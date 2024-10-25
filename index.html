@@ -3,77 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monitoring Dashboard</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      .up {
-        color: green;
-      }
-      .down {
-        color: red;
-      }
-      #traffic-chart {
-        width: 100%;
-        max-width: 600px;
-        margin: auto;
-      }
-    </style>
+    <title>Health Monitoring Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <h1>Monitoring Dashboard</h1>
+    <h1>Health Monitoring Dashboard</h1>
 
     <h2>Container Status</h2>
-    <table id="container-status">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div id="container-status"></div>
 
-    <h2>API Endpoint Status</h2>
-    <table id="endpoint-status">
-      <thead>
-        <tr>
-          <th>API Name</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <h2>Endpoint Status</h2>
+    <div id="endpoint-status"></div>
 
-    <h2>Server Resources</h2>
-    <div id="server-resources">
-      <p>CPU Usage: <span id="cpu-usage"></span></p>
-      <p>Total Memory: <span id="total-memory"></span> MB</p>
-      <p>Used Memory: <span id="used-memory"></span> MB</p>
-      <p>Free Memory: <span id="free-memory"></span> MB</p>
-    </div>
+    <h2>Resources</h2>
+    <div id="resources"></div>
 
-    <h2>Traffic Chart</h2>
-    <canvas id="traffic-chart"></canvas>
+    <h2>Traffic</h2>
+    <canvas id="trafficChart" width="400" height="200"></canvas>
 
-    <script src="server.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>

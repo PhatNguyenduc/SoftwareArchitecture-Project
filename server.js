@@ -1,15 +1,16 @@
 const express = require("express");
 const axios = require("axios");
-const Docker = require("dockerode");
 const cors = require("cors");
 const os = require("os-utils");
+const Docker = require("dockerode");
+
+const { exec } = require("child_process");
 
 const app = express();
 const port = 5000;
 
-app.use(cors()); // Enable all CORS requests
+app.use(cors());
 
-// Tạo một instance của Docker
 const docker = new Docker();
 
 // Kiểm tra trạng thái container
@@ -18,67 +19,75 @@ app.get("/api/container-status", async (req, res) => {
     const containers = await docker.listContainers({ all: true });
     const statuses = containers.map((container) => ({
       id: container.Id,
-      name: container.Names[0].replace("/", ""), // Lấy tên container
+      name: container.Names[0].replace("/", ""),
       status: container.State, // Lấy trạng thái container (up/down)
     }));
     res.json(statuses);
-    console.log(statuses);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching container status" });
   }
 });
 
-// Kiểm tra trạng thái API endpoint
-app.get("/api/endpoint-status", async (req, res) => {
+// API để lấy trạng thái của containers
+app.get("/api/container-status", async (req, res) => {
   try {
-    const goldPriceResponse = await axios.get(
-      "http://localhost:3001/api/gold-price"
-    );
-    const exchangeRateResponse = await axios.get(
-      "http://localhost:3002/api/exchange-rate"
-    );
-
-    const statuses = {
-      "Gold Price API": goldPriceResponse.status === 200 ? "up" : "down",
-      "Exchange Rate API": exchangeRateResponse.status === 200 ? "up" : "down",
-    };
-    res.json(statuses);
+    const containers = ["gold-price-container", "exchange-rate-container"];
+    const statuses = await Promise.all(containers.map(checkContainerStatus));
+    const result = containers.map((name, index) => ({
+      name,
+      status: statuses[index],
+    }));
+    res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching API status" });
+    res.status(500).json({ message: "Error fetching container status" });
+  }
+});
+
+// Kiểm tra tình trạng API endpoint
+const checkApiStatus = async (url) => {
+  try {
+    const response = await axios.get(url);
+    return response.status === 200 ? "up" : "down";
+  } catch {
+    return "down";
+  }
+};
+
+// API để lấy trạng thái của các endpoint
+app.get("/api/endpoint-status", async (req, res) => {
+  try {
+    const endpoints = [
+      "http://localhost:3001/api/gold-price",
+      "http://localhost:3002/api/exchange-rate",
+    ];
+    const statuses = await Promise.all(endpoints.map(checkApiStatus));
+    const result = endpoints.map((url, index) => ({
+      url,
+      status: statuses[index],
+    }));
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching endpoint status" });
   }
 });
 
 // Hiển thị tài nguyên máy chủ
-app.get("/api/server-resources", (req, res) => {
+app.get("/api/resources", (req, res) => {
   os.cpuUsage((cpuUsage) => {
-    const totalMem = os.totalmem();
-    const freeMem = os.freemem();
-    const usedMem = totalMem - freeMem;
-
     res.json({
-      cpuUsage,
-      totalMem,
-      freeMem,
-      usedMem,
-      freeMemPercentage: (freeMem / totalMem) * 100,
-      usedMemPercentage: (usedMem / totalMem) * 100,
+      cpu: cpuUsage,
+      memory: (os.totalmem() - os.freemem()) / os.totalmem(), // Tính toán bộ nhớ đã sử dụng
+      freeMemory: os.freemem() / os.totalmem(), // Bộ nhớ còn lại
     });
   });
 });
 
-// Example data
-let trafficData = {
-  data: [0, 10, 20, 30, 40, 50],
-  labels: ["1s", "2s", "3s", "4s", "5s", "6s"],
-};
+//Xay dung luu luong truy cap
 
-app.get("/api/traffic-data", (req, res) => {
-  res.json(trafficData);
-});
-
-// Chạy server
+// Bắt đầu server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
