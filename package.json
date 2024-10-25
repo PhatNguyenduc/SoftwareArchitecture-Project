@@ -1,0 +1,23 @@
+{
+  "name": "monitoringwebsite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "chart.js": "^4.4.5",
+    "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
+    "express": "^4.21.1",
+    "os-utils": "^0.0.14",
+    "socket.io": "^4.8.0",
+    "systeminformation": "^5.23.5"
+  }
+}
