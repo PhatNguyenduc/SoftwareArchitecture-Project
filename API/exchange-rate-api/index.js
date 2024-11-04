@@ -43,14 +43,14 @@ app.get("/api/exchange-rate", async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error("Error fetching exchange rate:", error.message);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching exchange rate, circuit breaker engaged.",
-      });
+    res.status(500).json({
+      message: "Error fetching exchange rate, circuit breaker engaged.",
+    });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Exchange Rate API is running on http://localhost:${port}`);
+  console.log(
+    `Exchange Rate API is running on http://localhost:${port}/api/exchange-rate`
+  );
 });

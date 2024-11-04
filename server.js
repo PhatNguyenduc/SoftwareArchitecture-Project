@@ -1,99 +1,112 @@
 const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
-const os = require("os-utils");
 const Docker = require("dockerode");
-const healthcheck = require("express-healthcheck");
-const { HealthCheck } = require("node-health-check");
-const si = require("systeminformation");
-const { exec } = require("child_process");
+const cors = require("cors");
 
 const app = express();
 const port = 5000;
-
 app.use(cors());
-app.use("/healthcheck", healthcheck());
-const docker = new Docker();
 
-// Kiểm tra trạng thái container
-app.get("/api/container-status", async (req, res) => {
+const docker = new Docker({ host: "localhost", port: 2375 });
+
+// Lấy thông tin CPU và Memory của một container cụ thể
+app.get("/api/container-stats/:containerId", async (req, res) => {
+  const containerId = req.params.containerId;
+  const container = docker.getContainer(containerId);
+
+  try {
+    const statsStream = await container.stats({ stream: false });
+    const cpuUsage = calculateCPUUsage(statsStream);
+    const memoryUsage = calculateMemoryUsage(statsStream);
+
+    res.json({ cpu: cpuUsage, memory: memoryUsage });
+  } catch (error) {
+    console.error("Error fetching container stats:", error);
+    res.status(500).json({ message: "Error fetching container stats" });
+  }
+});
+
+// Endpoint lấy trạng thái tất cả các container
+app.get("/api/containers", async (req, res) => {
   try {
     const containers = await docker.listContainers({ all: true });
-    const statuses = containers.map((container) => ({
-      id: container.Id,
-      name: container.Names[0].replace("/", ""),
-      status: container.State, // Lấy trạng thái container (up/down)
-    }));
-    res.json(statuses);
+    const containerStatuses = await Promise.all(
+      containers.map(async (containerInfo) => {
+        const container = docker.getContainer(containerInfo.Id);
+        const isRunning = containerInfo.State === "running";
+
+        // Tính toán response time cho mỗi container
+        const start = Date.now();
+        try {
+          await container.inspect(); // Kiểm tra xem container có đang chạy không
+          const end = Date.now();
+          const responseTime = end - start;
+
+          // Nếu container đang chạy, lấy stats của nó
+          let cpuUsage = 0;
+          let memoryUsage = 0;
+          if (isRunning) {
+            const statsStream = await container.stats({ stream: false });
+            cpuUsage = calculateCPUUsage(statsStream);
+            memoryUsage = calculateMemoryUsage(statsStream);
+          }
+
+          return {
+            id: containerInfo.Id,
+            name: containerInfo.Names[0].replace("/", ""),
+            status: isRunning ? "up" : "down",
+            cpu: cpuUsage,
+            memory: memoryUsage,
+            responseTime: `${responseTime} ms`,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching container ${containerInfo.Id} info:`,
+            error
+          );
+          return {
+            id: containerInfo.Id,
+            name: containerInfo.Names[0].replace("/", ""),
+            status: "unknown",
+            cpu: 0,
+            memory: 0,
+            responseTime: "N/A",
+          };
+        }
+      })
+    );
+
+    res.json(containerStatuses);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching container status" });
+    console.error("Error fetching containers:", error);
+    res.status(500).json({ message: "Error fetching containers" });
   }
 });
 
-// API để lấy trạng thái của containers
-// app.get("/api/container-status", async (req, res) => {
-//   try {
-//     const containers = ["gold-price-container", "exchange-rate-container"];
-//     const statuses = await Promise.all(containers.map(checkContainerStatus));
-//     const result = containers.map((name, index) => ({
-//       name,
-//       status: statuses[index],
-//     }));
-//     res.json(result);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Error fetching container status" });
-//   }
-// });
+// Hàm tính toán sử dụng CPU
+function calculateCPUUsage(stats) {
+  const cpuDelta =
+    stats.cpu_stats.cpu_usage.total_usage -
+    stats.precpu_stats.cpu_usage.total_usage;
+  const systemDelta =
+    stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
 
-// Kiểm tra tình trạng API endpoint
-const checkApiStatus = async (url) => {
-  try {
-    const response = await axios.get(url);
-    return response.status === 200 ? "up" : "down";
-  } catch {
-    return "down";
-  }
-};
+  const cpuUsage =
+    systemDelta > 0
+      ? (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus * 100.0
+      : 0.0;
+  return cpuUsage.toFixed(2);
+}
 
-// API để lấy trạng thái của các endpoint
-app.get("/api/endpoint-status", async (req, res) => {
-  try {
-    const endpoints = [
-      "http://api.btmc.vn/api/BTMCAPI/getpricebtmc?key=3kd8ub1llcg9t45hnoh8hmn7t5kc2v",
-      "https://www.vietcombank.com.vn/api/exchangerates?date=now",
-    ];
-    const statuses = await Promise.all(endpoints.map(checkApiStatus));
-    const result = endpoints.map((url, index) => ({
-      url,
-      status: statuses[index],
-    }));
-    res.json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching endpoint status" });
-  }
-});
+// Hàm tính toán sử dụng bộ nhớ
+function calculateMemoryUsage(stats) {
+  const usedMemory =
+    (stats.memory_stats.usage - stats.memory_stats.stats.inactive_file) /
+    (1000 * 1000);
+  const totalMemory = stats.memory_stats.limit / (1024 * 1024 * 1024);
 
-// Hiển thị tài nguyên máy chủ
-app.get("/api/resources", async (req, res) => {
-  try {
-    const cpu = await si.currentLoad();
-    const mem = await si.mem();
-    res.json({
-      cpuLoad: cpu.currentLoad,
-      freeMemory: mem.available,
-      totalMemory: mem.total,
-    });
-  } catch (error) {
-    res.status(500).send("Error fetching resource info");
-  }
-});
+  return usedMemory.toFixed(2) + " MB / " + totalMemory.toFixed(2) + " GB";
+}
 
-//Xay dung luu luong truy cap
-
-// Bắt đầu server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
