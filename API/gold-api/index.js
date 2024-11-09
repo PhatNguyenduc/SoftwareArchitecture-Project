@@ -49,8 +49,45 @@ app.get("/api/gold-price", async (req, res) => {
   }
 });
 
+app.get("/api/gold-price/health", async (req, res) => {
+  try {
+    // Check the status of the API by calling the exchange rate function
+    const goldPriceStatus = await breaker.fire();
+    res.status(200).json({
+      status: "UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
+      api: "gold-price",
+      containerStatus: "Running",
+      endpointStatus: goldPriceStatus ? "UP" : "DOWN", // Monitor the status of api endpoints
+      systemMetrics: {
+        uptime: os.uptime(),
+        memoryUsage: process.memoryUsage(),
+        freeMemory: os.freemem(),
+        totalMemory: os.totalmem(),
+        cpuLoad: os.loadavg(),  // Average CPU load over the last 1, 5, and 15 minutes
+      }
+    });
+  } catch (error) {
+    // If the circuit breaker is open or there is an error, return a status of DOWN
+    res.status(500).json({
+      status: "DOWN",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
+      api: "gold-price",
+      containerStatus: "Error",
+      endpointStatus: "DOWN",
+      message: error.message,
+      systemMetrics: {
+        uptime: os.uptime(),
+        memoryUsage: process.memoryUsage(),
+        freeMemory: os.freemem(),
+        totalMemory: os.totalmem(),
+        cpuLoad: os.loadavg(),  // Average CPU load over the last 1, 5, and 15 minutes
+      }
+    });
+  }
+}); 
+
 app.listen(port, () => {
   console.log(
-    `Gold Price API is running on http://localhost:${port}/api/gold-price`
+    `Gold Price API is running on http://localhost:${port}/api/gold-price\n` +
+    `Gold Price API Health Check is running on http://localhost:${port}/api/gold-price/health\n`
   );
 });
