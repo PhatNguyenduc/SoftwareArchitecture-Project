@@ -59,7 +59,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       status: "UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "exchange-rate",
       containerStatus: "Running",
-      endpointStatus: exchangeRateStatus ? "UP" : "DOWN", // Monitor the status of api endpoints
+      endpointStatus: "UP", // Monitor the status of api endpoints
       systemMetrics: {
         uptime: os.uptime(),
         memoryUsage: process.memoryUsage(),

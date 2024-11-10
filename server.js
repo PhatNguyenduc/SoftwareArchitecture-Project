@@ -38,40 +38,65 @@ app.get("/api/container-stats/:containerId", async (req, res) => {
 app.get("/api/health", async (req, res) => {
   try {
     // Make concurrent requests to both health endpoints
-    const [exchangeRateApiHealthResponse, goldApiHealthResponse] =
-      await Promise.all([
-        axios.get(exchangeRateApiHealthUrl),
-        axios.get(goldApiHealthUrl),
-      ]);
+    const [exchangeRateApiHealthResponse, goldApiHealthResponse] = await Promise.all([
+      // Wrapping each request with individual try-catch to handle partial failures
+      (async () => {
+        try {
+          const response = await axios.get(exchangeRateApiHealthUrl);
+          if (response.status === 200) {
+
+            return { status: "UP", data: response.data };
+          } else if (response.status === 500 && response.data) {
+
+            // Partially operational: service is up but experiencing issues
+            return { status: "PARTIALLY_UP", data: response.data };
+          } else {
+            console.error("Error fetching exchange-rate-api health:", error.message);
+            // Fully down or unreachable
+            return { status: "DOWN", data: null };
+          }
+        } catch (error) {
+          console.error("Error fetching exchange-rate-api health:", error.message);
+          return { status: "DOWN", data: null }; // Mark as down if request fails
+        }
+      })(),
+      (async () => {
+        try {
+          const response = await axios.get(goldApiHealthUrl);
+          if (response.status === 200) {
+
+            return { status: "UP", data: response.data };
+          } else if (response.status === 500 && response.data) {
+
+            // Partially operational: service is up but experiencing issues
+            return { status: "PARTIALLY_UP", data: response.data };
+          } else {
+            console.error("Error fetching gold-api health:", error.message);
+            // Fully down or unreachable
+            return { status: "DOWN", data: null };
+          }
+        } catch (error) {
+          console.error("Error fetching gold-api health:", error.message);
+          return { status: "DOWN", data: null }; // Mark as down if request fails
+        }
+      })(),
+    ]);
 
     // Aggregate responses from both services
     const aggregatedStatus = {
-      status:
-        exchangeRateApiHealthResponse.data.status === "UP" &&
-        goldApiHealthResponse.data.status === "UP"
-          ? "UP"
-          : "DOWN", // Are all services ok?
-      exchangeRateApi: exchangeRateApiHealthResponse.data, // services bị down nhưng vẫn có thể gọi được
-      goldApi: goldApiHealthResponse.data,
+      status: (exchangeRateApiHealthResponse.status === "UP" && goldApiHealthResponse.status === "UP") ? "UP" : "DOWN", // Overall status
+      exchangeRateApi: exchangeRateApiHealthResponse,  // Individual service status
+      goldApi: goldApiHealthResponse,
     };
 
     res.status(200).json(aggregatedStatus);
   } catch (error) {
-    // Handle errors in case one or both services are down
-    const errorResponse = {
+    // Handle unexpected errors (e.g., aggregation code issues, unexpected exceptions)
+    console.error("Unexpected error in health aggregation:", error.message);
+    res.status(500).json({
       status: "DOWN",
-      message: "One or more services are unavailable",
-      exchangeRateApi:
-        error.response && error.response.status === 500
-          ? { status: "DOWN" }
-          : { status: "UP" }, // services không thể gọi tới - nên dùng DOWN hay DIE?
-      goldApi:
-        error.response && error.response.status === 500
-          ? { status: "DOWN" }
-          : { status: "UP" },
-    };
-
-    res.status(500).json(errorResponse);
+      message: "An error occurred while aggregating health checks.",
+    });
   }
 });
 
