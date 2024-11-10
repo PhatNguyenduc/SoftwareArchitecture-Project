@@ -71,7 +71,7 @@ app.get("/api/gold-price/health", async (req, res) => {
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
     res.status(500).json({
-      status: "DOWN",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
+      status: "PARTIALLY_UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "gold-price",
       containerStatus: "Error",
       endpointStatus: "DOWN",
