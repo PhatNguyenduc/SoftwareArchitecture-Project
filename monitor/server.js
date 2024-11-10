@@ -4,7 +4,7 @@ const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
-const port = 5000;
+const port = 8000;
 
 const exchangeRatePort = 3002;
 const goldPricePort = 3001;
@@ -14,8 +14,8 @@ const goldApiHealthUrl = `http://localhost:${goldPricePort}/api/gold-price/healt
 
 app.use(cors());
 
-const docker = new Docker({ host: "localhost", port: 2375 });
-
+//const docker = new Docker({ host: "localhost", port: 2375 });
+const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 // Lấy thông tin CPU và Memory của một container cụ thể
 app.get("/api/container-stats/:containerId", async (req, res) => {
   const containerId = req.params.containerId;
