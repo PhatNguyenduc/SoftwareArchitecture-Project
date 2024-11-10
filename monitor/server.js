@@ -4,7 +4,7 @@ const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
-const port = 8000;
+const port = 8020;
 
 const exchangeRatePort = 3002;
 const goldPricePort = 3001;

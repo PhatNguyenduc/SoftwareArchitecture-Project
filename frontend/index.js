@@ -83,7 +83,7 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
 // Hàm lấy dữ liệu từ server và cập nhật biểu đồ
 async function fetchContainerData() {
   try {
-    const containerData = await $.get("http://localhost:5000/api/containers");
+    const containerData = await $.get("http://localhost:8020/api/containers");
 
     // Hiển thị trạng thái container
     $("#container-status").html(
@@ -141,7 +141,7 @@ async function fetchContainerData() {
 // Hàm lấy trạng thái sức khỏe từ server
 async function fetchHealthStatus() {
   try {
-    const healthData = await $.get("http://localhost:5000/api/health");
+    const healthData = await $.get("http://localhost:8020/api/health");
 
     $("#health-status").html(`
       <h3>API Health</h3>
