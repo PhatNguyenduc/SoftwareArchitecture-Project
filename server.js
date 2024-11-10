@@ -82,9 +82,18 @@ app.get("/api/health", async (req, res) => {
       })(),
     ]);
 
+    serverStatus = "UP"
+    if (exchangeRateApiHealthResponse.status === "UP" && goldApiHealthResponse.status === "UP") {
+      serverStatus = "UP"
+    } else if (exchangeRateApiHealthResponse.status === "UP" || goldApiHealthResponse.status === "UP") {
+      serverStatus = "PARTIALLY_UP"
+    } else {
+      serverStatus = "DOWN"
+    }
+
     // Aggregate responses from both services
     const aggregatedStatus = {
-      status: (exchangeRateApiHealthResponse.status === "UP" && goldApiHealthResponse.status === "UP") ? "UP" : "DOWN", // Overall status
+      status: serverStatus, // Overall status
       exchangeRateApi: exchangeRateApiHealthResponse,  // Individual service status
       goldApi: goldApiHealthResponse,
     };
