@@ -1,0 +1,22 @@
+version: "3"
+services:
+  exchange-rate-api:
+    build:
+      context: ./API/exchange-rate-api
+    ports:
+      - "3002:3002"
+    container_name: exchange-rate-api-service
+
+  gold-api:
+    build:
+      context: ./API/gold-api
+    ports:
+      - "3001:3001"
+    container_name: gold-api-service
+
+  monitor:
+    build:
+      context: ./monitor
+    ports:
+      - "8000:8000"
+    container_name: monitor-service
