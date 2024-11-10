@@ -1,7 +1,7 @@
 const express = require("express");
 const Docker = require("dockerode");
 const cors = require("cors");
-const axios = require('axios');
+const axios = require("axios");
 
 const app = express();
 const port = 5000;
@@ -100,62 +100,62 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Endpoint lấy trạng thái tất cả các container
-// app.get("/api/containers", async (req, res) => {
-//   try {
-//     const containers = await docker.listContainers({ all: true });
-//     const containerStatuses = await Promise.all(
-//       containers.map(async (containerInfo) => {
-//         const container = docker.getContainer(containerInfo.Id);
-//         const isRunning = containerInfo.State === "running";
+//Endpoint lấy trạng thái tất cả các container
+app.get("/api/containers", async (req, res) => {
+  try {
+    const containers = await docker.listContainers({ all: true });
+    const containerStatuses = await Promise.all(
+      containers.map(async (containerInfo) => {
+        const container = docker.getContainer(containerInfo.Id);
+        const isRunning = containerInfo.State === "running";
 
-//         // Tính toán response time cho mỗi container
-//         const start = Date.now();
-//         try {
-//           await container.inspect(); // Kiểm tra xem container có đang chạy không
-//           const end = Date.now();
-//           const responseTime = end - start;
+        // Tính toán response time cho mỗi container
+        const start = Date.now();
+        try {
+          await container.inspect(); // Kiểm tra xem container có đang chạy không
+          const end = Date.now();
+          const responseTime = end - start;
 
-//           // Nếu container đang chạy, lấy stats của nó
-//           let cpuUsage = 0;
-//           let memoryUsage = 0;
-//           if (isRunning) {
-//             const statsStream = await container.stats({ stream: false });
-//             cpuUsage = calculateCPUUsage(statsStream);
-//             memoryUsage = calculateMemoryUsage(statsStream);
-//           }
+          // Nếu container đang chạy, lấy stats của nó
+          let cpuUsage = 0;
+          let memoryUsage = 0;
+          if (isRunning) {
+            const statsStream = await container.stats({ stream: false });
+            cpuUsage = calculateCPUUsage(statsStream);
+            memoryUsage = calculateMemoryUsage(statsStream);
+          }
 
-//           return {
-//             id: containerInfo.Id,
-//             name: containerInfo.Names[0].replace("/", ""),
-//             status: isRunning ? "up" : "down",
-//             cpu: cpuUsage,
-//             memory: memoryUsage,
-//             responseTime: `${responseTime} ms`,
-//           };
-//         } catch (error) {
-//           console.error(
-//             `Error fetching container ${containerInfo.Id} info:`,
-//             error
-//           );
-//           return {
-//             id: containerInfo.Id,
-//             name: containerInfo.Names[0].replace("/", ""),
-//             status: "unknown",
-//             cpu: 0,
-//             memory: 0,
-//             responseTime: "N/A",
-//           };
-//         }
-//       })
-//     );
+          return {
+            id: containerInfo.Id,
+            name: containerInfo.Names[0].replace("/", ""),
+            status: isRunning ? "up" : "down",
+            cpu: cpuUsage,
+            memory: memoryUsage,
+            responseTime: `${responseTime} ms`,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching container ${containerInfo.Id} info:`,
+            error
+          );
+          return {
+            id: containerInfo.Id,
+            name: containerInfo.Names[0].replace("/", ""),
+            status: "unknown",
+            cpu: 0,
+            memory: 0,
+            responseTime: "N/A",
+          };
+        }
+      })
+    );
 
-//     res.json(containerStatuses);
-//   } catch (error) {
-//     console.error("Error fetching containers:", error);
-//     res.status(500).json({ message: "Error fetching containers" });
-//   }
-// });
+    res.json(containerStatuses);
+  } catch (error) {
+    console.error("Error fetching containers:", error);
+    res.status(500).json({ message: "Error fetching containers" });
+  }
+});
 
 // Hàm tính toán sử dụng CPU
 function calculateCPUUsage(stats) {
