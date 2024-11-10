@@ -4,6 +4,7 @@
 <ol>
   <li>docker-compose up -d</li>
   <li>cd monitor</li>
+  <li>npm install</li>
   <li>node server.js</li>
   <li>New terminal, then: cd frontend, open index.html</li>
 </ol>
