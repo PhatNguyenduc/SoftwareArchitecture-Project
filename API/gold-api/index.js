@@ -3,6 +3,8 @@ const axios = require("axios");
 const cors = require("cors");
 const CircuitBreaker = require("opossum");
 const os = require("os");
+const fs = require("fs");
+const { memoryUsage } = require("process");
 
 
 const app = express();
@@ -20,9 +22,9 @@ async function fetchGoldPrice() {
 
 // Cấu hình circuit breaker
 const breakerOptions = {
-  timeout: 5000, // thời gian tối đa cho một yêu cầu (5 giây)
+  timeout: 15000, // thời gian tối đa cho một yêu cầu (15 giây)
   errorThresholdPercentage: 50, // ngưỡng lỗi cho phép là 50%
-  resetTimeout: 10000, // thời gian chờ để thử lại sau khi breaker "ngắt" (10 giây)
+  resetTimeout: 20000, // thời gian chờ để thử lại sau khi breaker "ngắt" (10 giây)
 };
 
 const breaker = new CircuitBreaker(fetchGoldPrice, breakerOptions);
@@ -52,21 +54,27 @@ app.get("/api/gold-price", async (req, res) => {
 });
 
 app.get("/api/gold-price/health", async (req, res) => {
+  let memoryUsageInMB = 0
+  try {
+    const memoryUsage = fs.readFileSync("/sys/fs/cgroup/memory/memory.usage_in_bytes", "utf8");
+
+    // Convert memory usage to MB or GB for readability
+    memoryUsageInMB = (parseInt(memoryUsage) / (1024 * 1024)).toFixed(2); // MB
+  } catch (error) {
+    memoryUsageInMB = NaN
+  }
+
   try {
     // Check the status of the API by calling the exchange rate function
     const goldPriceStatus = await breaker.fire();
+ 
     res.status(200).json({
       status: "UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "gold-price",
       containerStatus: "Running",
       endpointStatus: "UP", // Monitor the status of api endpoints
-      systemMetrics: {
-        uptime: os.uptime(),
-        memoryUsage: process.memoryUsage(),
-        freeMemory: os.freemem(),
-        totalMemory: os.totalmem(),
-        cpuLoad: os.loadavg(),  // Average CPU load over the last 1, 5, and 15 minutes
-      }
+      memoryUsageInMB: memoryUsageInMB,
+      totalMemory: `${os.totalmem() / (1024 * 1024)} MB`,
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -76,13 +84,8 @@ app.get("/api/gold-price/health", async (req, res) => {
       containerStatus: "Error",
       endpointStatus: "DOWN",
       message: error.message,
-      systemMetrics: {
-        uptime: os.uptime(),
-        memoryUsage: process.memoryUsage(),
-        freeMemory: os.freemem(),
-        totalMemory: os.totalmem(),
-        cpuLoad: os.loadavg(),  // Average CPU load over the last 1, 5, and 15 minutes
-      }
+      memoryUsageInMB: memoryUsageInMB,
+      totalMemory: `${os.totalmem() / (1024 * 1024)} MB`,
     });
   }
 }); 

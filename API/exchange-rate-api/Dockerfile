@@ -1,5 +1,5 @@
 # Sử dụng node làm base image
-FROM node:20.12.2
+FROM node:20.12.2-bullseye-slim
 
 # Tạo thư mục app trong container
 WORKDIR /app
