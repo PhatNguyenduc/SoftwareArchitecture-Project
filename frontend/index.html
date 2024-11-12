@@ -4,29 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Health Monitoring Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
-  <body style="padding: 100px">
-    <h1>Health Monitoring Dashboard</h1>
+  <body class="dashboard-body">
+    <h1 class="dashboard-title">Health Monitoring Dashboard</h1>
 
-    <h2>Container Status</h2>
-    <div id="container-status"></div>
+    <h2 class="section-title">Container Status</h2>
+    <div id="container-status" class="status-section"></div>
 
-    <h2>Resources</h2>
-    <div id="resources"></div>
+    <h2 class="section-title">Resources</h2>
+    <div id="resources" class="resources-section"></div>
 
-    <h2>Health Status</h2>
-    <div id="health-status"></div>
+    <h2 class="section-title">Health Status</h2>
+    <div id="health-status" class="health-status-section"></div>
 
-    <h2>Response Time for Container 1</h2>
-    <div style="width: 1200px; height: 800px">
-      <canvas id="trafficChart1" width="400" height="200"></canvas>
+    <h2 class="section-title">Response Time for Container 1</h2>
+    <div class="chart-container">
+      <canvas id="trafficChart1"></canvas>
     </div>
 
-    <h2>Response Time for Container 2</h2>
-    <div style="width: 1200px; height: 800px">
-      <canvas id="trafficChart2" width="400" height="200"></canvas>
+    <h2 class="section-title">Response Time for Container 2</h2>
+    <div class="chart-container">
+      <canvas id="trafficChart2"></canvas>
     </div>
 
     <script src="index.js"></script>
