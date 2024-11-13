@@ -2,10 +2,7 @@
 
 <h2>How to run?</h2>
 <ol>
-  <li>docker-compose up -d</li>
-  <li>cd monitor</li>
-  <li>npm install</li>
-  <li>node server.js</li>
+  <li>docker-compose up --build -d</li>
   <li>New terminal, then: cd frontend, open index.html</li>
 </ol>
 <h2>How to terminate?</h2>
