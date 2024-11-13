@@ -4,6 +4,8 @@ const cors = require("cors");
 const CircuitBreaker = require("opossum");
 const os = require("os");
 const fs = require("fs");
+const { resolve } = require("path");
+const { rejects } = require("assert");
 
 
 
@@ -18,6 +20,26 @@ async function fetchExchangeRate() {
     "https://www.vietcombank.com.vn/api/exchangerates?date=now"
   );
   return response.data;
+}
+
+function getCpuUsage() {
+  const cpuUsage = parseInt(fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8"));
+  return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
+}
+
+function getCpuUsagePercent() {
+  return new Promise((resolve, rejects) => {
+    try {
+      const startCpuUsage = getCpuUsage();
+      setTimeout(() => {
+        const endCpuUsage = getCpuUsage();
+        const cpuUsagePercent = ((endCpuUsage - startCpuUsage) / 2 * 100).toFixed(2);
+        resolve(cpuUsagePercent);
+      }, 2000)
+    } catch (error) {
+      rejects(error);
+    }
+  })
 }
 
 // Cấu hình circuit breaker
@@ -54,6 +76,7 @@ app.get("/api/exchange-rate", async (req, res) => {
 });
 
 app.get("/api/exchange-rate/health", async (req, res) => {
+  //Read memory usage
   let memoryUsageInMB = 0
   try {
     const memoryUsage = fs.readFileSync("/sys/fs/cgroup/memory/memory.usage_in_bytes", "utf8");
@@ -62,6 +85,30 @@ app.get("/api/exchange-rate/health", async (req, res) => {
     memoryUsageInMB = (parseInt(memoryUsage) / (1024 * 1024)).toFixed(2); // MB
   } catch (error) {
     memoryUsageInMB = NaN
+  }
+
+  //Read cpu usage in 2s
+  let cpuUsagePercent = 0.0
+  try {
+    cpuUsagePercent = await getCpuUsagePercent()
+    console.log(`CPU Usage Percent: ${cpuUsagePercent}%`)
+  } catch (error) {
+    console.log("Error calculating CPU usage:", error);
+    cpuUsagePercent = NaN
+  }
+
+  //Get transmitted and received network
+  let networkReceivedMB = 0
+  let networkTransmittedMB = 0
+  try {
+    const receivedBytes = fs.readFileSync("/sys/class/net/eth0/statistics/rx_bytes", "utf8"); // Received bytes
+    const transmittedBytes = fs.readFileSync("/sys/class/net/eth0/statistics/tx_bytes", "utf8"); // Transmitted bytes
+
+    networkReceivedMB = (parseInt(receivedBytes) / (1024 * 1024)).toFixed(2);
+    networkTransmittedMB = (parseInt(transmittedBytes) / (1024 * 1024)).toFixed(2);
+  } catch (error) {
+    networkReceivedMB = NaN
+    networkTransmittedMB = NaN
   }
 
   try {
@@ -73,7 +120,11 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       containerStatus: "Running",
       endpointStatus: "UP", // Monitor the status of api endpoints
       memoryUsageInMB: memoryUsageInMB,
-      totalMemory: `${os.totalmem() / (1024 * 1024)} MB`,
+      totalMemoryInMB: `${os.totalmem() / (1024 * 1024)}`,
+      cpuUsagePercent: cpuUsagePercent,
+      networkReceivedMB: networkReceivedMB,
+      networkTransmittedMB: networkTransmittedMB,
+
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -84,7 +135,10 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       endpointStatus: "DOWN",
       message: error.message,
       memoryUsageInMB: memoryUsageInMB,
-      totalMemory: `${os.totalmem() / (1024 * 1024)} MB`,
+      totalMemoryInMB: `${os.totalmem() / (1024 * 1024)}`,
+      cpuUsagePercent: cpuUsagePercent,
+      networkReceivedMB: networkReceivedMB,
+      networkTransmittedMB: networkTransmittedMB,
     });
   }
 }); 
