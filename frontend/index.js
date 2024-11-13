@@ -4,7 +4,7 @@ const responseTimeDataContainer2 = [];
 const responseTimeLabelsContainer1 = [];
 const responseTimeLabelsContainer2 = [];
 
-// Tạo biểu đồ cho Container 1
+// Tạo biểu đồ cho Container 1 (Exchange Rate API)
 const responseTimeChartContext1 = document
   .getElementById("trafficChart1")
   .getContext("2d");
@@ -15,7 +15,7 @@ const responseTimeChart1 = new Chart(responseTimeChartContext1, {
     labels: responseTimeLabelsContainer1,
     datasets: [
       {
-        label: "Container 1 Response Time (ms)",
+        label: "Exchange Rate API Response Time (ms)",
         data: responseTimeDataContainer1,
         borderColor: "rgba(147, 250, 165, 1)",
         backgroundColor: "rgba(147, 250, 165, 0.2)",
@@ -42,7 +42,7 @@ const responseTimeChart1 = new Chart(responseTimeChartContext1, {
   },
 });
 
-// Tạo biểu đồ cho Container 2
+// Tạo biểu đồ cho Container 2 (Gold Price API)
 const responseTimeChartContext2 = document
   .getElementById("trafficChart2")
   .getContext("2d");
@@ -53,10 +53,10 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
     labels: responseTimeLabelsContainer2,
     datasets: [
       {
-        label: "Container 2 Response Time (ms)",
+        label: "Gold Price API Response Time (ms)",
         data: responseTimeDataContainer2,
-        borderColor: "rgba(240, 128, 128, 1)",
-        backgroundColor: "rgba(240, 128, 128, 0.2)",
+        borderColor: "rgba(147, 250, 165, 1)",
+        backgroundColor: "rgba(147, 250, 165, 0.2)",
         fill: true,
       },
     ],
@@ -80,74 +80,59 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
   },
 });
 
-// Hàm lấy dữ liệu từ server và cập nhật biểu đồ
-async function fetchContainerData() {
-  try {
-    const containerData = await $.get("http://localhost:8020/api/containers");
-
-    // Hiển thị trạng thái container
-    $("#container-status").html(
-      containerData
-        .map(
-          (container) =>
-            `<p>Container ${container.name} (ID: ${container.id}): ${container.status}</p>`
-        )
-        .join("")
-    );
-
-    // Hiển thị tài nguyên container
-    $("#resources").html(
-      containerData
-        .map(
-          (container) =>
-            `<p><strong>${container.name}</strong> - CPU: ${container.cpu}% - Memory: ${container.memory} - Response Time: ${container.responseTime}</p>`
-        )
-        .join("")
-    );
-
-    const currentTime = new Date().toLocaleTimeString();
-
-    // Cập nhật dữ liệu cho từng container
-    containerData.forEach((container, index) => {
-      if (container.status === "up") {
-        if (index === 0) {
-          responseTimeDataContainer1.push(parseFloat(container.responseTime));
-          responseTimeLabelsContainer1.push(currentTime);
-
-          if (responseTimeDataContainer1.length > 720) {
-            responseTimeDataContainer1.shift();
-            responseTimeLabelsContainer1.shift();
-          }
-
-          responseTimeChart1.update();
-        } else if (index === 1) {
-          responseTimeDataContainer2.push(parseFloat(container.responseTime));
-          responseTimeLabelsContainer2.push(currentTime);
-
-          if (responseTimeDataContainer2.length > 720) {
-            responseTimeDataContainer2.shift();
-            responseTimeLabelsContainer2.shift();
-          }
-
-          responseTimeChart2.update();
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching container data:", error);
-  }
-}
-
-// Hàm lấy trạng thái sức khỏe từ server
+// Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 async function fetchHealthStatus() {
+  const startTime = Date.now(); // Bắt đầu đo thời gian phản hồi
+
   try {
     const healthData = await $.get("http://localhost:8020/api/health");
+    const responseTime = Date.now() - startTime; // Thời gian phản hồi
+    const currentTime = new Date().toLocaleTimeString();
 
+    // Kiểm tra tình trạng của từng API và cập nhật biểu đồ
+    if (healthData.exchangeRateApi.status === "UP") {
+      responseTimeDataContainer1.push(responseTime);
+      responseTimeLabelsContainer1.push(currentTime);
+
+      if (responseTimeDataContainer1.length > 720) {
+        responseTimeDataContainer1.shift();
+        responseTimeLabelsContainer1.shift();
+      }
+
+      responseTimeChart1.update();
+    }
+
+    if (healthData.goldApi.status === "UP") {
+      responseTimeDataContainer2.push(responseTime);
+      responseTimeLabelsContainer2.push(currentTime);
+
+      if (responseTimeDataContainer2.length > 720) {
+        responseTimeDataContainer2.shift();
+        responseTimeLabelsContainer2.shift();
+      }
+
+      responseTimeChart2.update();
+    }
+
+    // Cập nhật trạng thái sức khỏe và tài nguyên trong giao diện
     $("#health-status").html(`
       <h3>API Health</h3>
       <p>Exchange Rate API: ${healthData.exchangeRateApi.status}</p>
       <p>Gold Price API: ${healthData.goldApi.status}</p>
     `);
+
+    $("#resources").html(`
+      <h3>Memory Usage</h3>
+      <p>Exchange Rate API Memory Usage: ${healthData.exchangeRateApi.data.memoryUsageInMB} MB / ${healthData.exchangeRateApi.data.totalMemory}</p>
+      <p>Gold Price API Memory Usage: ${healthData.goldApi.data.memoryUsageInMB} MB / ${healthData.goldApi.data.totalMemory}</p>
+    `);
+
+    $("#container-status").html(`
+      <h3>Container Status</h3>
+      <p>Exchange Rate API Container Status: ${healthData.exchangeRateApi.data.containerStatus}</p>
+      <p>Gold Price API Container Status: ${healthData.goldApi.data.containerStatus}</p>
+    `);
+
   } catch (error) {
     console.error("Error fetching health status:", error);
     $("#health-status").html("<p>Error fetching health status.</p>");
@@ -155,8 +140,5 @@ async function fetchHealthStatus() {
 }
 
 // Gọi hàm lấy dữ liệu mỗi 10 giây
-setInterval(fetchContainerData, 5000);
 setInterval(fetchHealthStatus, 5000);
-
 fetchHealthStatus();
-fetchContainerData();
