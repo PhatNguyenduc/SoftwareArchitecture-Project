@@ -1,0 +1,30 @@
+services:
+  - type: web
+    runtime: docker
+    name: exchange-rate-api
+    rootDir: ./API/exchange-rate-api
+    dockerCommand: docker-compose up exchange-rate-api-service
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 3002
+
+  - type: web
+    runtime: docker
+    name: gold-api
+    rootDir: ./API/gold-api
+    dockerCommand: docker-compose up gold-api-service
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 3001
+
+  - type: web
+    runtime: docker
+    name: monitor
+    rootDir: ./monitor
+    dockerCommand: docker-compose up monitor-service
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 8020
