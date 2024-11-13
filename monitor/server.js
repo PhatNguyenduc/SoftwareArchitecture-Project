@@ -9,10 +9,12 @@ const port = 8020;
 const exchangeRatePort = 3002;
 const goldPricePort = 3001;
 
-// const exchangeRateApiHealthUrl =
-//   "https://softwarearchitecture-project-exchange.onrender.com/api/exchange-rate/health";
-const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/api/exchange-rate/health`;
-const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
+const exchangeRateApiHealthUrl =
+  "https://softwarearchitecture-project-exchange.onrender.com/api/exchange-rate/health";
+const goldApiHealthUrl = `https://softwarearchitecture-project-gold.onrender.com/api/gold-price/health`;
+
+// const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/api/exchange-rate/health`;
+// const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
 
 app.use(cors());
 
