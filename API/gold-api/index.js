@@ -8,7 +8,6 @@ const { memoryUsage } = require("process");
 const { resolve } = require("path");
 const { rejects } = require("assert");
 
-
 const app = express();
 const port = 3001;
 
@@ -23,7 +22,9 @@ async function fetchGoldPrice() {
 }
 
 function getCpuUsage() {
-  const cpuUsage = parseInt(fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8"));
+  const cpuUsage = parseInt(
+    fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8")
+  );
   return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
 }
 
@@ -33,13 +34,16 @@ function getCpuUsagePercent() {
       const startCpuUsage = getCpuUsage();
       setTimeout(() => {
         const endCpuUsage = getCpuUsage();
-        const cpuUsagePercent = ((endCpuUsage - startCpuUsage) / 2 * 100).toFixed(2);
+        const cpuUsagePercent = (
+          ((endCpuUsage - startCpuUsage) / 2) *
+          100
+        ).toFixed(2);
         resolve(cpuUsagePercent);
-      }, 2000)
+      }, 2000);
     } catch (error) {
       rejects(error);
     }
-  })
+  });
 }
 
 // Cấu hình circuit breaker
@@ -77,46 +81,57 @@ app.get("/api/gold-price", async (req, res) => {
 
 app.get("/api/gold-price/health", async (req, res) => {
   //Read memory
-  let memoryUsageInMB = 0
+  let memoryUsageInMB = 0;
   try {
-    const memoryUsage = fs.readFileSync("/sys/fs/cgroup/memory/memory.usage_in_bytes", "utf8");
+    const memoryUsage = fs.readFileSync(
+      "/sys/fs/cgroup/memory/memory.usage_in_bytes",
+      "utf8"
+    );
 
     // Convert memory usage to MB or GB for readability
     memoryUsageInMB = (parseInt(memoryUsage) / (1024 * 1024)).toFixed(2); // MB
   } catch (error) {
-    memoryUsageInMB = NaN
+    memoryUsageInMB = NaN;
   }
 
   //Read cpu usage in 2s
-  let cpuUsagePercent = 0.0
+  let cpuUsagePercent = 0.0;
   try {
-    cpuUsagePercent = await getCpuUsagePercent()
-    console.log(`CPU Usage Percent: ${cpuUsagePercent}%`)
+    cpuUsagePercent = await getCpuUsagePercent();
+    console.log(`CPU Usage Percent: ${cpuUsagePercent}%`);
   } catch (error) {
     console.log("Error calculating CPU usage:", error);
-    cpuUsagePercent = NaN
+    cpuUsagePercent = NaN;
   }
 
   //Get transmitted and received network
-  let networkReceivedMB = 0
-  let networkTransmittedMB = 0
+  let networkReceivedMB = 0;
+  let networkTransmittedMB = 0;
   try {
-    const receivedBytes = fs.readFileSync("/sys/class/net/eth0/statistics/rx_bytes", "utf8"); // Received bytes
-    const transmittedBytes = fs.readFileSync("/sys/class/net/eth0/statistics/tx_bytes", "utf8"); // Transmitted bytes
+    const receivedBytes = fs.readFileSync(
+      "/sys/class/net/eth0/statistics/rx_bytes",
+      "utf8"
+    ); // Received bytes
+    const transmittedBytes = fs.readFileSync(
+      "/sys/class/net/eth0/statistics/tx_bytes",
+      "utf8"
+    ); // Transmitted bytes
 
     networkReceivedMB = (parseInt(receivedBytes) / (1024 * 1024)).toFixed(2);
-    networkTransmittedMB = (parseInt(transmittedBytes) / (1024 * 1024)).toFixed(2);
+    networkTransmittedMB = (parseInt(transmittedBytes) / (1024 * 1024)).toFixed(
+      2
+    );
   } catch (error) {
-    networkReceivedMB = NaN
-    networkTransmittedMB = NaN
+    networkReceivedMB = NaN;
+    networkTransmittedMB = NaN;
   }
 
   try {
     // Check the status of the API by calling the exchange rate function
     const goldPriceStatus = await breaker.fire();
- 
+
     res.status(200).json({
-      status: "UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
+      status: "UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "gold-price",
       containerStatus: "Running",
       endpointStatus: "UP", // Monitor the status of api endpoints
@@ -129,7 +144,7 @@ app.get("/api/gold-price/health", async (req, res) => {
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
     res.status(500).json({
-      status: "PARTIALLY_UP",   // Indicate both the container and endpoint, status = UP when container and endpoint are ok
+      status: "PARTIALLY_UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "gold-price",
       containerStatus: "Error",
       endpointStatus: "DOWN",
@@ -141,11 +156,11 @@ app.get("/api/gold-price/health", async (req, res) => {
       networkTransmittedMB: networkTransmittedMB,
     });
   }
-}); 
+});
 
 app.listen(port, () => {
   console.log(
     `Gold Price API is running on http://localhost:${port}/api/gold-price\n` +
-    `Gold Price API Health Check is running on http://localhost:${port}/api/gold-price/health\n`
+      `Gold Price API Health Check is running on http://localhost:${port}/api/gold-price/health\n`
   );
 });
