@@ -209,45 +209,48 @@ async function fetchHealthStatus() {
     const exchangeRateEndpoint =
       healthData?.exchangeRateApi?.data?.endpointStatus ?? "DOWN";
     const exchangeRateContainer =
-      healthData?.exchangeRateApi?.data?.containerStatus ?? "notRunning";
-
+      healthData?.exchangeRateApi?.data?.containerStatus ?? "DOWN";
+    console.log(
+      exchangeRateStatus,
+      exchangeRateEndpoint,
+      exchangeRateContainer
+    );
     // Kiểm tra chi tiết trạng thái Exchange Rate
     if (
       exchangeRateStatus === "UP" &&
       exchangeRateEndpoint === "UP" &&
-      exchangeRateContainer === "Running"
+      exchangeRateContainer === "UP"
     ) {
       exchangeRateStatusCounts.up++;
-    } else if (
-      exchangeRateStatus === "DOWN" ||
-      exchangeRateContainer !== "Running"
-    ) {
-      exchangeRateStatusCounts.down++;
-    } else {
+    } else if (exchangeRateStatus === "PARTIALLY_UP") {
       // Partially up khi endpoint down nhưng service vẫn chạy
       exchangeRateStatusCounts.partial++;
+    } else if (
+      exchangeRateStatus === "DOWN" ||
+      exchangeRateContainer !== "UP"
+    ) {
+      exchangeRateStatusCounts.down++;
     }
 
     // Kiểm tra trạng thái Gold API
     const goldStatus = healthData?.goldApi?.data?.status ?? "DOWN";
     const goldEndpoint = healthData?.goldApi?.data?.endpointStatus ?? "DOWN";
 
-    const goldContainer =
-      healthData?.goldApi?.data?.containerStatus ?? "notRunning";
+    const goldContainer = healthData?.goldApi?.data?.containerStatus ?? "DOWN";
 
-    console.log(goldStatus, goldEndpoint, goldContainer);
+    // console.log(goldStatus, goldEndpoint, goldContainer);
 
     // Kiểm tra chi tiết trạng thái Gold
     if (
       goldStatus === "UP" &&
       goldEndpoint === "UP" &&
-      goldContainer === "Running"
+      goldContainer === "UP"
     ) {
       goldStatusCounts.up++;
-    } else if (goldStatus === "DOWN" || goldContainer !== "Running") {
-      goldStatusCounts.down++;
-    } else {
+    } else if (goldStatus === "PARTIALLY_UP") {
       goldStatusCounts.partial++;
+    } else if (goldStatus === "DOWN" || goldContainer !== "UP") {
+      goldStatusCounts.down++;
     }
 
     // Cập nhật biểu đồ tròn
@@ -300,8 +303,8 @@ async function fetchHealthStatus() {
 
     $("#resources").html(`
       <h3>Memory Usage</h3>
-      <p>Exchange Rate API: ${healthData?.exchangeRateApi?.data?.memoryUsageInMB} MB / ${healthData?.exchangeRateApi?.data?.totalMemory}</p>
-      <p>Gold Price API: ${healthData?.goldApi?.data?.memoryUsageInMB} MB / ${healthData?.goldApi?.data?.totalMemory}</p>
+      <p>Exchange Rate API: ${healthData?.exchangeRateApi?.data?.memoryUsageInMB} MB / ${healthData?.exchangeRateApi?.data?.totalMemoryInMB}</p>
+      <p>Gold Price API: ${healthData?.goldApi?.data?.memoryUsageInMB} MB / ${healthData?.goldApi?.data?.totalMemoryInMB}</p>
     `);
 
     $("#container-status").html(`
