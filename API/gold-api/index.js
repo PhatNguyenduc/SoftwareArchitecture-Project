@@ -118,9 +118,7 @@ app.get("/api/gold-price/health", async (req, res) => {
     ); // Transmitted bytes
 
     networkReceivedMB = (parseInt(receivedBytes) / (1024 * 1024)).toFixed(2);
-    networkTransmittedMB = (parseInt(transmittedBytes) / (1024 * 1024)).toFixed(
-      2
-    );
+    networkTransmittedMB = (parseInt(transmittedBytes) / (1024 * 1024)).toFixed(2);
   } catch (error) {
     networkReceivedMB = NaN;
     networkTransmittedMB = NaN;
@@ -146,7 +144,7 @@ app.get("/api/gold-price/health", async (req, res) => {
     res.status(200).json({
       status: "PARTIALLY_UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "gold-price",
-      containerStatus: "DOWN",
+      containerStatus: "UP",
       endpointStatus: "DOWN",
       message: error.message,
       memoryUsageInMB: memoryUsageInMB,
