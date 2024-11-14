@@ -23,15 +23,47 @@
   padding-bottom: 5px;
 }
 
+/* Thêm style cho div cha chứa 2 biểu đồ */
+div:has(#exchangeRateChartContainer) {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Container cho 2 biểu đồ tròn */
+#exchangeRateChartContainer,
+#goldChartContainer {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Đảm bảo canvas có kích thước phù hợp */
+#exchangeRatePieChart,
+#goldPieChart {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 300px;
+  margin: 0 auto;
+  display: block;
+}
+
+.container-status-section {
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Status and Resources Sections */
 .status-section,
 .resources-section,
 .health-status-section {
   padding: 20px;
   margin-bottom: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-section p,
@@ -59,11 +91,6 @@
   width: 100%;
 }
 
-canvas {
-  max-width: 100%;
-  height: auto;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
   .dashboard-body {
@@ -88,7 +115,14 @@ canvas {
     font-size: 1.3em;
   }
 
-  .chart-container {
+  /* Điều chỉnh responsive cho 2 biểu đồ */
+  div:has(#exchangeRateChartContainer) {
+    flex-direction: column;
+  }
+
+  #exchangeRateChartContainer,
+  #goldChartContainer {
     width: 100%;
+    margin: 10px 0;
   }
 }
