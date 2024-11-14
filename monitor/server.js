@@ -2,6 +2,7 @@ const express = require("express");
 const Docker = require("dockerode");
 const cors = require("cors");
 const axios = require("axios");
+const validAPIKey = "anhHiepDepTrai";
 
 const app = express();
 const port = 8020;
@@ -17,9 +18,18 @@ const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health
 
 app.use(cors());
 
+function authenticateAPIKey(req, res, next) {
+  const apiKey = req.headers['api-key'] || req.query.apiKey;
+
+  if (apiKey === validAPIKey) {
+    return next();
+  }
+  return res.status(403).json({message: "Forbidden: Invalid API Key"})
+}
+
 // GATEWAY AGGREGATION
 // Aggregated health check for all endpoints
-app.get("/api/health", async (req, res) => {
+app.get("/api/health", authenticateAPIKey, async (req, res) => {
   try {
     // Make concurrent requests to both health endpoints
     const [exchangeRateApiHealthResponse, goldApiHealthResponse] =
