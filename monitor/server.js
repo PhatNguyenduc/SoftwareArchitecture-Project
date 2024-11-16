@@ -59,7 +59,7 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
     const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api")
     res.status(200).json(exchangeRateApiHealthResponse)
   } catch (error) {
-    console.error("Unexpected error in health aggregation:", error.message);
+    console.error("Unexpected error in health check:", error.message);
     res.status(500).json({
       status: "DOWN",
       message: "An error occurred while get exchange-rate-api health checks.",
@@ -67,9 +67,18 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
   }
 });
 
-
+// Gateway routing 2: gold-api
 app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
-  return getHealthInformation(goldApiHealthUrl, "gold-api")
+  try {
+    const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api")
+    res.status(200).json(goldApiHealthResponse)
+  } catch (error) {
+    console.error("Unexpected error in health check:", error.message);
+    res.status(500).json({
+      status: "DOWN",
+      message: "An error occurred while get exchange-rate-api health checks.",
+    });
+  }
 });
 
 // GATEWAY AGGREGATION
