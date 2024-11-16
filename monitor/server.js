@@ -27,6 +27,60 @@ function authenticateAPIKey(req, res, next) {
   return res.status(403).json({message: "Forbidden: Invalid API Key"})
 }
 
+async function getHealthInformation(url, apiName) {
+  try {
+    const response = await axios.get(url);
+    if (response.status === 200) {
+      return { data: response.data };
+    } else if (response.status === 500 && response.data !== null) {
+      // Partially operational: service is up but experiencing issues
+      // console.log("exchangeRateApiHealthResponse", response);
+      return { data: response.data };
+    } else {
+      console.error(
+        `Error fetching ${apiName} health:`,
+        error.message
+      );
+      // Fully down or unreachable
+      return { data: null };
+    } 
+  } catch (error) {
+    console.error(
+      `Catching Error fetching ${apiName} health:`,
+      error.message
+    );
+    return { data: null }; // Mark as down if request fails
+  }
+}
+
+// Gateway routing 1: Exchange-rate-api
+app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
+  try {
+    const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api")
+    res.status(200).json(exchangeRateApiHealthResponse)
+  } catch (error) {
+    console.error("Unexpected error in health check:", error.message);
+    res.status(500).json({
+      status: "DOWN",
+      message: "An error occurred while get exchange-rate-api health checks.",
+    });
+  }
+});
+
+// Gateway routing 2: gold-api
+app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
+  try {
+    const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api")
+    res.status(200).json(goldApiHealthResponse)
+  } catch (error) {
+    console.error("Unexpected error in health check:", error.message);
+    res.status(500).json({
+      status: "DOWN",
+      message: "An error occurred while get exchange-rate-api health checks.",
+    });
+  }
+});
+
 // GATEWAY AGGREGATION
 // Aggregated health check for all endpoints
 app.get("/api/health", authenticateAPIKey, async (req, res) => {
