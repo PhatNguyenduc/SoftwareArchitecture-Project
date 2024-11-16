@@ -195,14 +195,16 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
 });
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
-const API_KEY = "hihihihi"
+const API_KEY = "anhHiepDepTrai"
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
   try {
-    const healthData = await $.get("http://localhost:8020/api/health", {
-      headers: {
-        'api-key': API_KEY,
+    const healthData = await $.ajax({
+      url: "http://localhost:8020/api/health",
+      method: "GET",
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("api-key", API_KEY);
       }
     });
     const responseTime = Date.now() - startTime;
