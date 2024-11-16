@@ -97,21 +97,6 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
         })(),
       ]);
 
-    // serverStatus = "UP";
-    // if (
-    //   exchangeRateApiHealthResponse.status === 200 &&
-    //   goldApiHealthResponse.status === 200
-    // ) {
-    //   serverStatus = "UP";
-    // } else if (
-    //   exchangeRateApiHealthResponse.status === 200 ||
-    //   goldApiHealthResponse.status === 200
-    // ) {
-    //   serverStatus = "PARTIALLY_UP";
-    // } else {
-    //   serverStatus = "DOWN";
-    // }
-
     // Aggregate responses from both services
     const aggregatedStatus = {
       status: serverStatus, // Overall status
@@ -131,5 +116,5 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}/api/health`);
 });
