@@ -56,8 +56,8 @@ async function getHealthInformation(url, apiName) {
 // Gateway routing 1: Exchange-rate-api
 app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
   try {
-    const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api")
-    res.status(200).json(exchangeRateApiHealthResponse)
+    const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api");
+    res.status(200).json(exchangeRateApiHealthResponse);
   } catch (error) {
     console.error("Unexpected error in health check:", error.message);
     res.status(500).json({
@@ -67,11 +67,11 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
   }
 });
 
-// Gateway routing 2: gold-api
+// Gateway routing 2: Gold-api
 app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
   try {
-    const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api")
-    res.status(200).json(goldApiHealthResponse)
+    const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api");
+    res.status(200).json(goldApiHealthResponse);
   } catch (error) {
     console.error("Unexpected error in health check:", error.message);
     res.status(500).json({
@@ -90,68 +90,27 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
       await Promise.all([
         // Wrapping each request with individual try-catch to handle partial failures
         (async () => {
-          try {
-            const response = await axios.get(exchangeRateApiHealthUrl);
-            // console.log("exchangeRateApiHealthResponse", response);
-            if (response.status === 200) {
-              return { data: response.data };
-            } else if (response.status === 500 && response.data !== null) {
-              // Partially operational: service is up but experiencing issues
-              // console.log("exchangeRateApiHealthResponse", response);
-              return { data: response.data };
-            } else {
-              console.error(
-                "Error fetching exchange-rate-api health:",
-                error.message
-              );
-              // Fully down or unreachable
-              return { data: null };
-            }
-          } catch (error) {
-            console.error(
-              "Catching Error fetching exchange-rate-api health:",
-              error.message
-            );
-            return { data: null }; // Mark as down if request fails
-          }
+          return getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api");
         })(),
         (async () => {
-          try {
-            const response = await axios.get(goldApiHealthUrl);
-            if (response.status === 200) {
-              return { data: response.data };
-            } else if (response.status === 500 && response.data !== null) {
-              // Partially operational: service is up but experiencing issues
-              return { data: response.data };
-            } else {
-              console.error("Error fetching gold-api health:", error.message);
-              // Fully down or unreachable
-              return { data: null };
-            }
-          } catch (error) {
-            console.error(
-              " Catching Error fetching gold-api health:",
-              error.message
-            );
-            return { data: null }; // Mark as down if request fails
-          }
+          return getHealthInformation(goldApiHealthUrl, "gold-api");
         })(),
       ]);
 
-    serverStatus = "UP";
-    if (
-      exchangeRateApiHealthResponse.status === 200 &&
-      goldApiHealthResponse.status === 200
-    ) {
-      serverStatus = "UP";
-    } else if (
-      exchangeRateApiHealthResponse.status === 200 ||
-      goldApiHealthResponse.status === 200
-    ) {
-      serverStatus = "PARTIALLY_UP";
-    } else {
-      serverStatus = "DOWN";
-    }
+    // serverStatus = "UP";
+    // if (
+    //   exchangeRateApiHealthResponse.status === 200 &&
+    //   goldApiHealthResponse.status === 200
+    // ) {
+    //   serverStatus = "UP";
+    // } else if (
+    //   exchangeRateApiHealthResponse.status === 200 ||
+    //   goldApiHealthResponse.status === 200
+    // ) {
+    //   serverStatus = "PARTIALLY_UP";
+    // } else {
+    //   serverStatus = "DOWN";
+    // }
 
     // Aggregate responses from both services
     const aggregatedStatus = {
