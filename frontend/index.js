@@ -131,8 +131,8 @@ const responseTimeChart1 = new Chart(responseTimeChartContext1, {
       {
         label: "Exchange Rate API Response Time (ms)",
         data: responseTimeDataContainer1,
-        borderColor: "rgba(147, 250, 165, 1)",
-        backgroundColor: "rgba(147, 250, 165, 0.2)",
+        // borderColor: "rgba(147, 250, 165, 1)",
+        // backgroundColor: "rgba(147, 250, 165, 0.2)",
         fill: true,
       },
     ],
@@ -169,8 +169,8 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
       {
         label: "Gold Price API Response Time (ms)",
         data: responseTimeDataContainer2,
-        borderColor: "rgba(147, 250, 165, 1)",
-        backgroundColor: "rgba(147, 250, 165, 0.2)",
+        // borderColor: "rgba(147, 250, 165, 1)",
+        // backgroundColor: "rgba(147, 250, 165, 0.2)",
         fill: true,
       },
     ],
@@ -276,30 +276,52 @@ async function fetchHealthStatus() {
     exchangeRatePieChart.update();
     goldPieChart.update();
 
-    // Cập nhật biểu đồ response time chỉ khi endpoint UP
-    if (exchangeRateEndpoint === "UP") {
-      responseTimeDataContainer1.push(responseTime);
-      responseTimeLabelsContainer1.push(currentTime);
 
-      if (responseTimeDataContainer1.length > 720) {
-        responseTimeDataContainer1.shift();
-        responseTimeLabelsContainer1.shift();
-      }
+    // Exchange-rate-api graph update
+    responseTimeDataContainer1.push(responseTime);
+    responseTimeLabelsContainer1.push(currentTime);
 
-      responseTimeChart1.update();
+    if (responseTimeDataContainer1.length > 720) {
+      responseTimeDataContainer1.shift();
+      responseTimeLabelsContainer1.shift();
     }
 
-    if (goldEndpoint === "UP") {
-      responseTimeDataContainer2.push(responseTime);
-      responseTimeLabelsContainer2.push(currentTime);
+    // Cập nhật biểu đồ response time chỉ khi endpoint UP
+    if (exchangeRateEndpoint === "UP") {
+      responseTimeChart1.data.datasets[0].borderColor = "rgba(147, 250, 165, 1)";
+      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(147, 250, 165, 0.2)";
+    } else if (exchangeRateEndpoint === "PARTIALLY_UP") {
+      responseTimeChart1.data.datasets[0].borderColor = "rgba(255, 235, 59, 1)";
+      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(255, 235, 59, 0.2)";
+    } else {
+      responseTimeChart1.data.datasets[0].borderColor = "rgba(244, 67, 54, 1)";
+      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(244, 67, 54, 0.2)";
+    }
+
+    responseTimeChart1.update();
+
+    // Gold-api graph update
+    responseTimeDataContainer2.push(responseTime);
+    responseTimeLabelsContainer2.push(currentTime);
 
       if (responseTimeDataContainer2.length > 720) {
         responseTimeDataContainer2.shift();
         responseTimeLabelsContainer2.shift();
       }
 
-      responseTimeChart2.update();
+    if (goldEndpoint === "UP") {
+      responseTimeChart2.data.datasets[0].borderColor = "rgba(147, 250, 165, 1)";
+      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(147, 250, 165, 0.2)";
+    } else if (exchangeRateEndpoint === "PARTIALLY_UP") {
+      responseTimeChart2.data.datasets[0].borderColor = "rgba(255, 235, 59, 1)";
+      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(255, 235, 59, 0.2)";
+    } else {
+      responseTimeChart2.data.datasets[0].borderColor = "rgba(244, 67, 54, 1)";
+      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(244, 67, 54, 0.2)";
     }
+    
+    responseTimeChart2.update();
+
 
     // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
     $("#health-status").html(`

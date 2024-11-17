@@ -18,6 +18,7 @@ const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health
 
 app.use(cors());
 
+//localhost:port//api/health?api_key=anhHiepDepTrai
 function authenticateAPIKey(req, res, next) {
   const apiKey = req.headers['api-key'] || req.query.apiKey;
 
@@ -96,6 +97,22 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
           return getHealthInformation(goldApiHealthUrl, "gold-api");
         })(),
       ]);
+
+    serverStatus = "UP";
+    if (
+      exchangeRateApiHealthResponse.status === 200 &&
+      goldApiHealthResponse.status === 200
+    ) {
+      serverStatus = "UP";
+    } else if (
+      exchangeRateApiHealthResponse.status === 200 ||
+      goldApiHealthResponse.status === 200
+    ) {
+      serverStatus = "PARTIALLY_UP";
+    } else {
+      serverStatus = "DOWN";
+    }
+  
 
     // Aggregate responses from both services
     const aggregatedStatus = {
