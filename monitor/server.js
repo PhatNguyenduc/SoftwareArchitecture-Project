@@ -17,8 +17,8 @@ const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/a
 const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
 
 const coolDownTime = 1000 * 60 * 10; // 10 min
-const exchangeRateNotificationTimePoint = Date.now();
-const goldNotificationTimePoint = Date.now();
+var exchangeRateNotificationTimePoint = 0;
+var goldNotificationTimePoint = 0;
 
 // const exchangeRateApiHealthUrl = `http://localhost:${exchangeRatePort}/api/exchange-rate/health`;
 // const goldApiHealthUrl = `http://localhost:${goldPricePort}/api/gold-price/health`;
@@ -69,13 +69,18 @@ async function getHealthInformation(url, apiName) {
 
 // Gateway routing 1: Exchange-rate-api
 app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
+  const clientEmail = req.headers['dest-email'];
+  let validEmail = validateEmail(clientEmail);
+
   try {
     const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api");
-    let exchangeRateApiStatus = (exchangeRateApiHealthResponse.data?.status) ?? "DOWN";
-    if (exchangeRateApiStatus !== "UP"
-      && (Date.now() - exchangeRateNotificationTimePoint >= coolDownTime)) {
-        sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
-        exchangeRateNotificationTimePoint = Date.now();
+    if (validEmail) {
+      let exchangeRateApiStatus = (exchangeRateApiHealthResponse.data?.status) ?? "DOWN";
+      if (exchangeRateApiStatus !== "UP"
+        && (Date.now() - exchangeRateNotificationTimePoint >= coolDownTime)) {
+          sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
+          exchangeRateNotificationTimePoint = Date.now();
+      }
     }
     res.status(200).json(exchangeRateApiHealthResponse);
   } catch (error) {
@@ -89,13 +94,17 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
 
 // Gateway routing 2: Gold-api
 app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
+  const clientEmail = req.headers['dest-email'];
+  let validEmail = validateEmail(clientEmail);
   try {
     const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api");
-    let goldApiStatus = (goldApiHealthResponse.data?.status) ?? "DOWN";
-    if (goldApiStatus !== "UP"
-      && (Date.now() - goldNotificationTimePoint >= coolDownTime)) {
-        sendEmailNotification("gold-api", goldApiStatus, clientEmail);
-        goldNotificationTimePoint = Date.now();
+    if (validEmail) {
+      let goldApiStatus = (goldApiHealthResponse.data?.status) ?? "DOWN";
+      if (goldApiStatus !== "UP"
+        && (Date.now() - goldNotificationTimePoint >= coolDownTime)) {
+          sendEmailNotification("gold-api", goldApiStatus, clientEmail);
+          goldNotificationTimePoint = Date.now();
+      }
     }
     res.status(200).json(goldApiHealthResponse);
   } catch (error) {
@@ -112,7 +121,6 @@ app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
 app.get("/api/health", authenticateAPIKey, async (req, res) => {
   const clientEmail = req.headers['dest-email'];
   let validEmail = validateEmail(clientEmail);
-  console.log(clientEmail)
 
   try {
     // Make concurrent requests to both health endpoints
