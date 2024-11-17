@@ -16,6 +16,10 @@ const goldPricePort = 3001;
 const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/api/exchange-rate/health`;
 const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
 
+const coolDownTime = 1000 * 60 * 10; // 10 min
+const exchangeRateNotificationTimePoint = Date.now();
+const goldNotificationTimePoint = Date.now();
+
 // const exchangeRateApiHealthUrl = `http://localhost:${exchangeRatePort}/api/exchange-rate/health`;
 // const goldApiHealthUrl = `http://localhost:${goldPricePort}/api/gold-price/health`;
 
@@ -67,6 +71,12 @@ async function getHealthInformation(url, apiName) {
 app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
   try {
     const exchangeRateApiHealthResponse = getHealthInformation(exchangeRateApiHealthUrl, "exchange-rate-api");
+    let exchangeRateApiStatus = (exchangeRateApiHealthResponse.data?.status) ?? "DOWN";
+    if (exchangeRateApiStatus !== "UP"
+      && (Date.now() - exchangeRateNotificationTimePoint >= coolDownTime)) {
+        sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
+        exchangeRateNotificationTimePoint = Date.now();
+    }
     res.status(200).json(exchangeRateApiHealthResponse);
   } catch (error) {
     console.error("Unexpected error in health check:", error.message);
@@ -81,6 +91,12 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
 app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
   try {
     const goldApiHealthResponse = getHealthInformation(goldApiHealthUrl, "gold-api");
+    let goldApiStatus = (goldApiHealthResponse.data?.status) ?? "DOWN";
+    if (goldApiStatus !== "UP"
+      && (Date.now() - goldNotificationTimePoint >= coolDownTime)) {
+        sendEmailNotification("gold-api", goldApiStatus, clientEmail);
+        goldNotificationTimePoint = Date.now();
+    }
     res.status(200).json(goldApiHealthResponse);
   } catch (error) {
     console.error("Unexpected error in health check:", error.message);
@@ -129,10 +145,14 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
     if (validEmail) {
       let exchangeRateApiStatus = (exchangeRateApiHealthResponse.data?.status) ?? "DOWN";
       let goldApiStatus = (goldApiHealthResponse.data?.status) ?? "DOWN";
-      if (exchangeRateApiStatus) {
-        sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
-      } else if (goldApiStatus) {
-        sendEmailNotification("gold-api", goldApiStatus, clientEmail)
+      if (exchangeRateApiStatus !== "UP"
+        && (Date.now() - exchangeRateNotificationTimePoint >= coolDownTime)) {
+          sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
+          exchangeRateNotificationTimePoint = Date.now();
+      } else if (goldApiStatus !== "UP"
+        && (Date.now() - goldNotificationTimePoint >= coolDownTime)) {
+          sendEmailNotification("gold-api", goldApiStatus, clientEmail);
+          goldNotificationTimePoint = Date.now();
       }
     }
   
