@@ -195,7 +195,8 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
 });
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
-const API_KEY = "anhHiepDepTrai"
+const API_KEY = "anhHiepDepTrai";
+const CLIENT_EMAIL = "22028295@vnu.edu.vn";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
@@ -205,6 +206,7 @@ async function fetchHealthStatus() {
       method: "GET",
       beforeSend: function (xhr) {
         xhr.setRequestHeader("api-key", API_KEY);
+        xhr.setRequestHeader("dest-email", CLIENT_EMAIL);
       }
     });
     const responseTime = Date.now() - startTime;
