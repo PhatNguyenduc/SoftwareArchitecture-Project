@@ -1,8 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const Docker = require("dockerode");
 const cors = require("cors");
 const axios = require("axios");
-const validAPIKey = "anhHiepDepTrai";
+const sendEmailNotification = require("./sidecar/emailNotification");
+const validAPIKey = process.env.API_KEY;
+
 
 const app = express();
 const port = 8020;
@@ -26,6 +29,12 @@ function authenticateAPIKey(req, res, next) {
     return next();
   }
   return res.status(403).json({message: "Forbidden: Invalid API Key"})
+}
+
+// Helper function to validate email
+function validateEmail(email) {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // Basic email validation regex
+  return emailRegex.test(email);
 }
 
 async function getHealthInformation(url, apiName) {
@@ -85,6 +94,10 @@ app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
 // GATEWAY AGGREGATION
 // Aggregated health check for all endpoints
 app.get("/api/health", authenticateAPIKey, async (req, res) => {
+  const clientEmail = req.headers['dest-email'];
+  let validEmail = validateEmail(clientEmail);
+  console.log(clientEmail)
+
   try {
     // Make concurrent requests to both health endpoints
     const [exchangeRateApiHealthResponse, goldApiHealthResponse] =
@@ -100,17 +113,27 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
 
     serverStatus = "UP";
     if (
-      exchangeRateApiHealthResponse.status === 200 &&
-      goldApiHealthResponse.status === 200
+      exchangeRateApiHealthResponse.data?.status === "UP" &&
+      goldApiHealthResponse.data?.status === "UP"
     ) {
       serverStatus = "UP";
     } else if (
-      exchangeRateApiHealthResponse.status === 200 ||
-      goldApiHealthResponse.status === 200
+      exchangeRateApiHealthResponse.data?.status === "UP" ||
+      goldApiHealthResponse.data?.status === "UP"
     ) {
       serverStatus = "PARTIALLY_UP";
     } else {
       serverStatus = "DOWN";
+    }
+
+    if (validEmail) {
+      let exchangeRateApiStatus = (exchangeRateApiHealthResponse.data?.status) ?? "DOWN";
+      let goldApiStatus = (goldApiHealthResponse.data?.status) ?? "DOWN";
+      if (exchangeRateApiStatus) {
+        sendEmailNotification("exchange-rate-api", exchangeRateApiStatus, clientEmail);
+      } else if (goldApiStatus) {
+        sendEmailNotification("gold-api", goldApiStatus, clientEmail)
+      }
     }
   
 
@@ -119,6 +142,7 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
       status: serverStatus, // Overall status
       exchangeRateApi: exchangeRateApiHealthResponse, // Individual service status
       goldApi: goldApiHealthResponse,
+      message: `Fetch data successfully. Email is ${clientEmail ? (validEmail ? "valid" : "not valid") : "empty"}`,
     };
 
     res.status(200).json(aggregatedStatus);
