@@ -15,9 +15,11 @@
     "chart.js": "^4.4.5",
     "cors": "^2.8.5",
     "dockerode": "^4.0.2",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-healthcheck": "^0.1.0",
     "node-health-check": "^1.0.1",
+    "nodemailer": "^6.9.16",
     "os-utils": "^0.0.14",
     "socket.io": "^4.8.0",
     "systeminformation": "^5.23.5"

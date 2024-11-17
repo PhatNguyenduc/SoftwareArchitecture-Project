@@ -1,4 +1,3 @@
-require('dotenv').config({ path: '../private.env' });
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -10,6 +9,9 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendEmailNotification(serviceName, status, email) {
+    console.log("GMAIL_USER:", process.env.GMAIL_USER);
+    console.log("GMAIL_PASS:", process.env.GMAIL_PASS);
+
     const letter = {
         from: process.env.GMAIL_USER,
         to: email,
@@ -21,6 +23,7 @@ async function sendEmailNotification(serviceName, status, email) {
         await transporter.sendMail(letter);
         console.log("Email sent successfully");
     } catch (error) {
+        console.log(error)
         console.log("Failed to send email. The code is implement in monitor/sidecar/emailNotification.js")
     }
 }
