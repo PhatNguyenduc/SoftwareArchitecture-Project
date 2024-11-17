@@ -117,7 +117,20 @@ const responseTimeDataContainer1 = [];
 const responseTimeDataContainer2 = [];
 const responseTimeLabelsContainer1 = [];
 const responseTimeLabelsContainer2 = [];
+const responseTimeColorsContainer1 = [];
+const responseTimeColorsContainer2 = [];
+const responseTimeBgColorsContainer1 = [];
+const responseTimeBgColorsContainer2 = [];
 
+function getColorForStatus(status, isBackground = false) {
+  if (status === "DOWN") {
+    return isBackground ? "rgba(255, 0, 0, 0.2)" : "rgba(255, 0, 0, 1)";
+  } else if (status === "PARTIALLY_UP") {
+    return isBackground ? "rgba(255, 255, 0, 0.2)" : "rgba(255, 255, 0, 1)";
+  } else {
+    return isBackground ? "rgba(0, 255, 0, 0.2)" : "rgba(0, 255, 0, 1)";
+  }
+}
 // Tạo biểu đồ cho Container 1 (Exchange Rate API)
 const responseTimeChartContext1 = document
   .getElementById("trafficChart1")
@@ -131,9 +144,25 @@ const responseTimeChart1 = new Chart(responseTimeChartContext1, {
       {
         label: "Exchange Rate API Response Time (ms)",
         data: responseTimeDataContainer1,
-        // borderColor: "rgba(147, 250, 165, 1)",
-        // backgroundColor: "rgba(147, 250, 165, 0.2)",
+        borderColor: function (context) {
+          const index = context.dataIndex;
+          return responseTimeColorsContainer1[index];
+        },
+        backgroundColor: function (context) {
+          const index = context.dataIndex;
+          return responseTimeBgColorsContainer1[index];
+        },
         fill: true,
+        segment: {
+          borderColor: function (context) {
+            const index = context.p0DataIndex;
+            return responseTimeColorsContainer1[index];
+          },
+          backgroundColor: function (context) {
+            const index = context.p0DataIndex;
+            return responseTimeBgColorsContainer1[index];
+          },
+        },
       },
     ],
   },
@@ -169,9 +198,25 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
       {
         label: "Gold Price API Response Time (ms)",
         data: responseTimeDataContainer2,
-        // borderColor: "rgba(147, 250, 165, 1)",
-        // backgroundColor: "rgba(147, 250, 165, 0.2)",
+        borderColor: function (context) {
+          const index = context.dataIndex;
+          return responseTimeColorsContainer2[index];
+        },
+        backgroundColor: function (context) {
+          const index = context.dataIndex;
+          return responseTimeBgColorsContainer2[index];
+        },
         fill: true,
+        segment: {
+          borderColor: function (context) {
+            const index = context.p0DataIndex;
+            return responseTimeColorsContainer2[index];
+          },
+          backgroundColor: function (context) {
+            const index = context.p0DataIndex;
+            return responseTimeBgColorsContainer2[index];
+          },
+        },
       },
     ],
   },
@@ -194,8 +239,24 @@ const responseTimeChart2 = new Chart(responseTimeChartContext2, {
   },
 });
 
+function updateChartData(container, time, responseTime, status) {
+  if (container === 1) {
+    responseTimeLabelsContainer1.push(time);
+    responseTimeDataContainer1.push(responseTime);
+    responseTimeColorsContainer1.push(getColorForStatus(status));
+    responseTimeBgColorsContainer1.push(getColorForStatus(status, true));
+    responseTimeChart1.update();
+  } else if (container === 2) {
+    responseTimeLabelsContainer2.push(time);
+    responseTimeDataContainer2.push(responseTime);
+    responseTimeColorsContainer2.push(getColorForStatus(status));
+    responseTimeBgColorsContainer2.push(getColorForStatus(status, true));
+    responseTimeChart2.update();
+  }
+}
+
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
-const API_KEY = "anhHiepDepTrai"
+const API_KEY = "anhHiepDepTrai";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
@@ -205,7 +266,7 @@ async function fetchHealthStatus() {
       method: "GET",
       beforeSend: function (xhr) {
         xhr.setRequestHeader("api-key", API_KEY);
-      }
+      },
     });
     const responseTime = Date.now() - startTime;
     const currentTime = new Date().toLocaleTimeString();
@@ -217,11 +278,8 @@ async function fetchHealthStatus() {
       healthData?.exchangeRateApi?.data?.endpointStatus ?? "DOWN";
     const exchangeRateContainer =
       healthData?.exchangeRateApi?.data?.containerStatus ?? "DOWN";
-    console.log(
-      exchangeRateStatus,
-      exchangeRateEndpoint,
-      exchangeRateContainer
-    );
+
+    updateChartData(1, currentTime, responseTime, exchangeRateContainer);
     // Kiểm tra chi tiết trạng thái Exchange Rate
     if (
       exchangeRateStatus === "UP" &&
@@ -276,53 +334,19 @@ async function fetchHealthStatus() {
     exchangeRatePieChart.update();
     goldPieChart.update();
 
-
     // Exchange-rate-api graph update
-    responseTimeDataContainer1.push(responseTime);
-    responseTimeLabelsContainer1.push(currentTime);
 
-    if (responseTimeDataContainer1.length > 720) {
-      responseTimeDataContainer1.shift();
-      responseTimeLabelsContainer1.shift();
-    }
+    // console.log(
+    //   exchangeRateContainer,
+    //   exchangeRateEndpoint,
+    //   exchangeRateStatus
+    // );
 
-    // Cập nhật biểu đồ response time chỉ khi endpoint UP
-    if (exchangeRateEndpoint === "UP") {
-      responseTimeChart1.data.datasets[0].borderColor = "rgba(147, 250, 165, 1)";
-      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(147, 250, 165, 0.2)";
-    } else if (exchangeRateEndpoint === "PARTIALLY_UP") {
-      responseTimeChart1.data.datasets[0].borderColor = "rgba(255, 235, 59, 1)";
-      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(255, 235, 59, 0.2)";
-    } else {
-      responseTimeChart1.data.datasets[0].borderColor = "rgba(244, 67, 54, 1)";
-      responseTimeChart1.data.datasets[0].backgroundColor = "rgba(244, 67, 54, 0.2)";
-    }
+    updateChartData(2, currentTime, responseTime, goldContainer);
+    // console.log(goldContainer, goldEndpoint, goldStatus);
 
-    responseTimeChart1.update();
-
-    // Gold-api graph update
-    responseTimeDataContainer2.push(responseTime);
-    responseTimeLabelsContainer2.push(currentTime);
-
-      if (responseTimeDataContainer2.length > 720) {
-        responseTimeDataContainer2.shift();
-        responseTimeLabelsContainer2.shift();
-      }
-
-    if (goldEndpoint === "UP") {
-      responseTimeChart2.data.datasets[0].borderColor = "rgba(147, 250, 165, 1)";
-      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(147, 250, 165, 0.2)";
-    } else if (exchangeRateEndpoint === "PARTIALLY_UP") {
-      responseTimeChart2.data.datasets[0].borderColor = "rgba(255, 235, 59, 1)";
-      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(255, 235, 59, 0.2)";
-    } else {
-      responseTimeChart2.data.datasets[0].borderColor = "rgba(244, 67, 54, 1)";
-      responseTimeChart2.data.datasets[0].backgroundColor = "rgba(244, 67, 54, 0.2)";
-    }
-    
-    responseTimeChart2.update();
-
-
+    // console.log(responseTimeColorsContainer1);
+    // console.log(responseTimeColorsContainer2);
     // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
     $("#health-status").html(`
       <h3>API Health</h3>
