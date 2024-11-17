@@ -131,7 +131,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
     res.status(200).json({
       status: "UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "exchange-rate",
-      containerStatus: "Running",
+      containerStatus: "UP",
       endpointStatus: "UP", // Monitor the status of api endpoints
       memoryUsageInMB: memoryUsageInMB,
       totalMemoryInMB: `${os.totalmem() / (1024 * 1024)}`,
@@ -141,10 +141,10 @@ app.get("/api/exchange-rate/health", async (req, res) => {
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
-    res.status(500).json({
+    res.status(200).json({
       status: "PARTIALLY_UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "exchange-rate",
-      containerStatus: "Error",
+      containerStatus: "UP",
       endpointStatus: "DOWN",
       message: error.message,
       memoryUsageInMB: memoryUsageInMB,
