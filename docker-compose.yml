@@ -1,4 +1,3 @@
-version: "3"
 services:
   exchange-rate-api:
     build:
@@ -26,6 +25,6 @@ services:
     container_name: monitor-service
     networks:
       - backend
-    
+
 networks:
   backend:

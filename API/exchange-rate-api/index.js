@@ -21,10 +21,19 @@ async function fetchExchangeRate() {
 }
 
 function getCpuUsage() {
-  const cpuUsage = parseInt(
-    fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8")
-  );
-  return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
+  // const cpuUsage = parseInt(
+  //   fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8")
+  // );
+  // return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
+  const data = fs.readFileSync("/sys/fs/cgroup/cpu.stat", "utf8");
+  const lines = data.split("\n");
+  for (let line of lines) {
+    if (line.startsWith("usage_usec")) {
+      const value = line.split(" ")[1];
+      return parseInt(value, 10) / 1e6;
+    }
+  }
+  return null;
 }
 
 function getCpuUsagePercent() {
@@ -34,11 +43,11 @@ function getCpuUsagePercent() {
       setTimeout(() => {
         const endCpuUsage = getCpuUsage();
         const cpuUsagePercent = (
-          ((endCpuUsage - startCpuUsage) / 2) *
+          ((endCpuUsage - startCpuUsage) / 1) *
           100
         ).toFixed(2);
         resolve(cpuUsagePercent);
-      }, 2000);
+      }, 1000);
     } catch (error) {
       rejects(error);
     }
@@ -82,8 +91,13 @@ app.get("/api/exchange-rate/health", async (req, res) => {
   //Read memory usage
   let memoryUsageInMB = 0;
   try {
+    // const memoryUsage = fs.readFileSync(
+    //   "/sys/fs/cgroup/memory/memory.usage_in_bytes",
+    //   "utf8"
+    // );
+
     const memoryUsage = fs.readFileSync(
-      "/sys/fs/cgroup/memory/memory.usage_in_bytes",
+      "/sys/fs/cgroup/memory.current",
       "utf8"
     );
 
@@ -131,7 +145,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
     res.status(200).json({
       status: "UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "exchange-rate",
-      containerStatus: "Running",
+      containerStatus: "UP",
       endpointStatus: "UP", // Monitor the status of api endpoints
       memoryUsageInMB: memoryUsageInMB,
       totalMemoryInMB: `${os.totalmem() / (1024 * 1024)}`,
@@ -141,10 +155,10 @@ app.get("/api/exchange-rate/health", async (req, res) => {
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
-    res.status(500).json({
+    res.status(200).json({
       status: "PARTIALLY_UP", // Indicate both the container and endpoint, status = UP when container and endpoint are ok
       api: "exchange-rate",
-      containerStatus: "Error",
+      containerStatus: "UP",
       endpointStatus: "DOWN",
       message: error.message,
       memoryUsageInMB: memoryUsageInMB,

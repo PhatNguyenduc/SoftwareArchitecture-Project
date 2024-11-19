@@ -23,15 +23,47 @@
   padding-bottom: 5px;
 }
 
+/* Thêm style cho div cha chứa 2 biểu đồ */
+div:has(#exchangeRateChartContainer) {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Container cho 2 biểu đồ tròn */
+#exchangeRateChartContainer,
+#goldChartContainer {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Đảm bảo canvas có kích thước phù hợp */
+#exchangeRatePieChart,
+#goldPieChart {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 300px;
+  margin: 0 auto;
+  display: block;
+}
+
+.container-status-section {
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Status and Resources Sections */
 .status-section,
 .resources-section,
 .health-status-section {
   padding: 20px;
   margin-bottom: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-section p,
@@ -59,11 +91,6 @@
   width: 100%;
 }
 
-canvas {
-  max-width: 100%;
-  height: auto;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
   .dashboard-body {
@@ -88,7 +115,83 @@ canvas {
     font-size: 1.3em;
   }
 
-  .chart-container {
+  /* Điều chỉnh responsive cho 2 biểu đồ */
+  div:has(#exchangeRateChartContainer) {
+    flex-direction: column;
+  }
+
+  #exchangeRateChartContainer,
+  #goldChartContainer {
     width: 100%;
+    margin: 10px 0;
   }
 }
+
+#exchangeRateChartContainer,
+#goldChartContainer {
+  cursor: pointer;
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(128, 128, 128, 0.7); /* Màu đen mờ */
+  z-index: 1;
+}
+
+.popup {
+  display: none;
+  position: fixed;
+  top: 47%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  z-index: 2;
+}
+
+.popup h2 {
+  text-align: center;
+}
+
+.popup h3 span {
+  font-weight: normal;
+}
+
+.popup button {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.flex-container > div {
+  flex: 1;
+  min-width: 0;
+}
+canvas {
+  width: 100%;
+  height: 200px;
+}
+
+/* #cpuChart,
+#memoryChar {
+  max-width: 30%;
+} */
