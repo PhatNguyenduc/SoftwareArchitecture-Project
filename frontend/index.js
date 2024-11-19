@@ -255,9 +255,263 @@ function updateChartData(container, time, responseTime, status) {
   }
 }
 
+const exchangeRateChartContainer = document.getElementById(
+  "exchangeRateChartContainer"
+);
+const goldChartContainer = document.getElementById("goldChartContainer");
+
+// Hàm để mở popup
+function showPopup() {
+  var popup = document.getElementById("myPopup");
+  document.getElementById("overlay").style.display = "block";
+  document.body.classList.add("no-scroll");
+  popup.style.display = "block";
+}
+
+// Hàm để đóng popup
+function closePopup() {
+  var popup = document.getElementById("myPopup");
+  document.getElementById("overlay").style.display = "none";
+  document.body.classList.remove("no-scroll");
+  popup.style.display = "none";
+}
+
+function showPopup2() {
+  var popup = document.getElementById("myPopup2");
+  document.getElementById("overlay").style.display = "block";
+  document.body.classList.add("no-scroll");
+  popup.style.display = "block";
+}
+
+// Hàm để đóng popup
+function closePopup2() {
+  var popup = document.getElementById("myPopup2");
+  document.getElementById("overlay").style.display = "none";
+  document.body.classList.remove("no-scroll");
+  popup.style.display = "none";
+}
+
+exchangeRateChartContainer.addEventListener("click", showPopup);
+goldChartContainer.addEventListener("click", showPopup2);
+
+const cpuCtx = document.getElementById("cpuChart").getContext("2d");
+const memoryCtx = document.getElementById("memoryChart").getContext("2d");
+const networkCtx = document.getElementById("networkChart").getContext("2d");
+
+const cpuUsageData = [];
+const memoryUsageData = [];
+const networkReceivedData = [];
+const networkTransmittedData = [];
+const labels = [];
+
+const cpuCtx2 = document.getElementById("cpuChart2").getContext("2d");
+const memoryCtx2 = document.getElementById("memoryChart2").getContext("2d");
+const networkCtx2 = document.getElementById("networkChart2").getContext("2d");
+
+const cpuUsageData2 = [];
+const memoryUsageData2 = [];
+const networkReceivedData2 = [];
+const networkTransmittedData2 = [];
+const labels2 = [];
+
+const commonConfig = (labels, data, label, borderColor, maxValue) => ({
+  type: "line",
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: label,
+        data: data,
+        borderColor: borderColor,
+        borderWidth: 1,
+        fill: false,
+      },
+    ],
+  },
+  options: {
+    scales: {
+      x: {
+        beginAtZero: true,
+        time: {
+          unit: "second",
+        },
+      },
+      y: {
+        beginAtZero: true,
+        max: Math.max(maxValue, data),
+      },
+    },
+  },
+});
+const networkConfig = (labels, data1, data2, label, borderColor, maxValue) => ({
+  type: "line",
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: label,
+        data: data1,
+        borderColor: borderColor,
+        borderWidth: 1,
+        fill: false,
+      },
+      {
+        label: "Network Transmitted (MB)",
+        data: data2,
+        borderColor: "rgb(178,34,34)",
+        borderWidth: 1,
+        fill: false,
+      },
+    ],
+  },
+  options: {
+    scales: {
+      x: {
+        beginAtZero: true,
+        time: {
+          unit: "second",
+        },
+      },
+      y: {
+        beginAtZero: true,
+        max: Math.max(maxValue, data1, data2),
+      },
+    },
+  },
+});
+
+const cpuChart = new Chart(
+  cpuCtx,
+  commonConfig(
+    labels,
+    cpuUsageData,
+    "CPU Usage (%)",
+    "rgba(75, 192, 192, 1)",
+    5
+  )
+);
+const memoryChart = new Chart(
+  memoryCtx,
+  commonConfig(
+    labels,
+    memoryUsageData,
+    "Memory Usage (MB)",
+    "rgba(255, 99, 132, 1)",
+    200
+  )
+);
+const networkChart = new Chart(
+  networkCtx,
+  networkConfig(
+    labels,
+    networkReceivedData,
+    networkTransmittedData,
+    "Network Received (MB)",
+    "rgba(54, 162, 235, 1)",
+    400
+  )
+);
+
+// chart 2
+const cpuChart2 = new Chart(
+  cpuCtx2,
+  commonConfig(
+    labels2,
+    cpuUsageData2,
+    "CPU Usage (%)",
+    "rgba(75, 192, 192, 1)",
+    5
+  )
+);
+const memoryChart2 = new Chart(
+  memoryCtx2,
+  commonConfig(
+    labels2,
+    memoryUsageData2,
+    "Memory Usage (MB)",
+    "rgba(255, 99, 132, 1)",
+    200
+  )
+);
+const networkChart2 = new Chart(
+  networkCtx2,
+  networkConfig(
+    labels2,
+    networkReceivedData2,
+    networkTransmittedData2,
+    "Network Received (MB)",
+    "rgba(54, 162, 235, 1)",
+    400
+  )
+);
+
+async function updatePopupChart(data) {
+  try {
+    const cpuUsagePercent = parseFloat(
+      data.exchangeRateApi.data.cpuUsagePercent
+    );
+    const memoryUsageInMB = parseFloat(
+      data.exchangeRateApi.data.memoryUsageInMB
+    );
+    const networkReceivedMB = parseFloat(
+      data.exchangeRateApi.data.networkReceivedMB
+    );
+    const networkTransmittedMB = parseFloat(
+      data.exchangeRateApi.data.networkTransmittedMB
+    );
+
+    document.getElementById("cpuUsage").textContent = cpuUsagePercent + "%";
+    document.getElementById("memoryUsage").textContent = memoryUsageInMB + "MB";
+    document.getElementById("networkIo").textContent =
+      networkReceivedMB + "MB / " + networkTransmittedMB + "MB";
+
+    const now = new Date().toLocaleTimeString();
+    labels.push(now);
+    cpuUsageData.push(cpuUsagePercent);
+    memoryUsageData.push(memoryUsageInMB);
+    networkReceivedData.push(networkReceivedMB);
+    networkTransmittedData.push(networkTransmittedMB);
+
+    cpuChart.update();
+    memoryChart.update();
+    networkChart.update();
+  } catch (error) {
+    console.error("Error fetching system metrics:", error);
+  }
+}
+async function updatePopupChart2(data) {
+  try {
+    const cpuUsagePercent = parseFloat(data.goldApi.data.cpuUsagePercent);
+    const memoryUsageInMB = parseFloat(data.goldApi.data.memoryUsageInMB);
+    const networkReceivedMB = parseFloat(data.goldApi.data.networkReceivedMB);
+    const networkTransmittedMB = parseFloat(
+      data.goldApi.data.networkTransmittedMB
+    );
+
+    document.getElementById("cpuUsage2").textContent = cpuUsagePercent + "%";
+    document.getElementById("memoryUsage2").textContent =
+      memoryUsageInMB + "MB";
+    document.getElementById("networkIo2").textContent =
+      networkReceivedMB + "MB / " + networkTransmittedMB + "MB";
+
+    const now = new Date().toLocaleTimeString();
+    labels2.push(now);
+    cpuUsageData2.push(cpuUsagePercent);
+    memoryUsageData2.push(memoryUsageInMB);
+    networkReceivedData2.push(networkReceivedMB);
+    networkTransmittedData2.push(networkTransmittedMB);
+
+    cpuChart2.update();
+    memoryChart2.update();
+    networkChart2.update();
+  } catch (error) {
+    console.error("Error fetching system metrics:", error);
+  }
+}
+
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
-const CLIENT_EMAIL = "22028295@vnu.edu.vn";
+const CLIENT_EMAIL = "nguyenvannamdeptrai2004@gmail.com";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
@@ -367,6 +621,11 @@ async function fetchHealthStatus() {
       <p>Exchange Rate API: ${exchangeRateContainer}</p>
       <p>Gold Price API: ${goldContainer}</p>
     `);
+
+    // popup
+    updatePopupChart(healthData);
+    updatePopupChart2(healthData);
+    // end popup
   } catch (error) {
     console.error("Error fetching health status:", error);
     $("#health-status").html("<p>Error fetching health status.</p>");
@@ -374,5 +633,5 @@ async function fetchHealthStatus() {
 }
 
 // Khởi tạo và gọi hàm
-setInterval(fetchHealthStatus, 5000);
+setInterval(fetchHealthStatus, 1000);
 fetchHealthStatus();
