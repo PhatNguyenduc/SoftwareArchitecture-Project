@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health Monitoring Dashboard</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="dashboard-body">
+    <h1 class="dashboard-title">Health Monitoring Dashboard</h1>
+
+    <h2 class="section-title">Container Status</h2>
+    <div id="container-status" class="container-status-section"></div>
+
+    <div>
+      <div id="exchangeRateChartContainer" class="pie-chart-container-1">
+        <canvas id="exchangeRatePieChart"></canvas>
+      </div>
+
+      <!-- <div id="goldChartContainer" class="pie-chart-container-2">
+        <canvas id="goldPieChart"></canvas>
+      </div> -->
+    </div>
+
+    <h2 class="section-title">Resources</h2>
+    <div id="resources" class="resources-section"></div>
+
+    <h2 class="section-title">Health Status</h2>
+    <div id="health-status" class="health-status-section"></div>
+
+    <h2 class="section-title">Response Time for Exchange Rate API</h2>
+    <div class="chart-container">
+      <canvas id="trafficChart1"></canvas>
+    </div>
+
+    <!-- <h2 class="section-title">Response Time for Gold Price API</h2>
+    <div class="chart-container">
+      <canvas id="trafficChart2"></canvas>
+    </div> -->
+    <div id="overlay" class="overlay"></div>
+
+    <div class="popup" id="myPopup">
+      <h2>Exchange Rate</h2>
+      <div class="flex-container">
+        <div>
+          <h3>CPU usage: <span id="cpuUsage"></span></h3>
+          <canvas id="cpuChart"></canvas>
+        </div>
+        <!-- <hr /> -->
+        <div>
+          <h3>Memory usage: <span id="memoryUsage"></span></h3>
+          <canvas id="memoryChart"></canvas>
+        </div>
+      </div>
+      <br />
+      <hr />
+      <div>
+        <h3>Network I/O: <span id="networkIo"></span></h3>
+        <canvas id="networkChart"></canvas>
+      </div>
+      <button onclick="closePopup()">X</button>
+    </div>
+
+    <div class="popup" id="myPopup2">
+      <h2>Gold</h2>
+      <div class="flex-container">
+        <div>
+          <h3>CPU usage: <span id="cpuUsage2"></span></h3>
+          <canvas id="cpuChart2"></canvas>
+        </div>
+        <!-- <hr /> -->
+        <div>
+          <h3>Memory usage: <span id="memoryUsage2"></span></h3>
+          <canvas id="memoryChart2"></canvas>
+        </div>
+      </div>
+      <br />
+      <hr />
+      <div>
+        <h3>Network I/O: <span id="networkIo2"></span></h3>
+        <canvas id="networkChart2"></canvas>
+      </div>
+      <button onclick="closePopup2()">X</button>
+    </div>
+
+    <script src="exchangerate.js"></script>
+  </body>
+</html>

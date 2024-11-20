@@ -374,7 +374,7 @@ const networkConfig = (labels, data1, data2, label, borderColor, maxValue) => ({
       },
       y: {
         beginAtZero: true,
-        max: Math.max(maxValue, data1, data2),
+        max: maxValue,
       },
     },
   },
@@ -408,7 +408,7 @@ const networkChart = new Chart(
     networkTransmittedData,
     "Network Received (MB)",
     "rgba(54, 162, 235, 1)",
-    400
+    20
   )
 );
 
@@ -441,7 +441,7 @@ const networkChart2 = new Chart(
     networkTransmittedData2,
     "Network Received (MB)",
     "rgba(54, 162, 235, 1)",
-    400
+    20
   )
 );
 
