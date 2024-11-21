@@ -11,7 +11,19 @@ const { rejects } = require("assert");
 const app = express();
 const port = 3001;
 
+let requestCount = 0;
+
 app.use(cors());
+
+app.use((req, res, next) => {
+  // const start = Date.now();
+  if (req.method === "GET") {
+    requestCount++;
+  }
+  // const elapsed = Date.now() - start;
+  // console.log(`Middleware elapsed time: ${elapsed}ms`);
+  next();
+});
 
 // Định nghĩa một hàm cho API giá vàng
 async function fetchGoldPrice() {
@@ -46,11 +58,11 @@ function getCpuUsagePercent() {
       setTimeout(() => {
         const endCpuUsage = getCpuUsage();
         const cpuUsagePercent = (
-          ((endCpuUsage - startCpuUsage) / 1) *
+          ((endCpuUsage - startCpuUsage) / 2) *
           100
         ).toFixed(2);
         resolve(cpuUsagePercent);
-      }, 1000);
+      }, 2000);
     } catch (error) {
       rejects(error);
     }
@@ -155,6 +167,7 @@ app.get("/api/gold-price/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
+      requestCount: requestCount,
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -169,6 +182,7 @@ app.get("/api/gold-price/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
+      requestCount: requestCount,
     });
   }
 });

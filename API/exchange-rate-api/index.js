@@ -10,7 +10,16 @@ const { rejects } = require("assert");
 const app = express();
 const port = 3002;
 
+let requestCount = 0;
+
 app.use(cors());
+
+app.use((req, res, next) => {
+  if (req.method === "GET") {
+    requestCount++;
+  }
+  next();
+});
 
 // Định nghĩa một hàm cho API tỷ giá ngoại tệ
 async function fetchExchangeRate() {
@@ -45,11 +54,11 @@ function getCpuUsagePercent() {
       setTimeout(() => {
         const endCpuUsage = getCpuUsage();
         const cpuUsagePercent = (
-          ((endCpuUsage - startCpuUsage) / 1) *
+          ((endCpuUsage - startCpuUsage) / 2) *
           100
         ).toFixed(2);
         resolve(cpuUsagePercent);
-      }, 1000);
+      }, 2000);
     } catch (error) {
       rejects(error);
     }
@@ -154,6 +163,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
+      requestCount: requestCount,
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -168,6 +178,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
+      requestCount: requestCount,
     });
   }
 });

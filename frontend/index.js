@@ -1,6 +1,8 @@
 const exchangeRateStatusCounts = { up: 0, down: 0, partial: 0 };
 const goldStatusCounts = { up: 0, down: 0, partial: 0 };
 
+
+
 // Tạo biểu đồ cho Exchange Rate API
 const exchangeRatePieCtx = document
   .getElementById("exchangeRatePieChart")
@@ -604,6 +606,14 @@ async function fetchHealthStatus() {
     // console.log(responseTimeColorsContainer1);
     // console.log(responseTimeColorsContainer2);
     // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
+    // reqCount1.innerHTML = `Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}`;
+    // reqCount2.innerHTML = `Request Count: ${healthData?.goldApi?.data?.requestCount}`;
+    $("#reqCount1").html(
+      `<h3> Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}  </h3>`
+    );
+    $("#reqCount2").html(
+      `<h3> Request Count: ${healthData?.goldApi?.data?.requestCount}  </h3>`
+    );
     $("#health-status").html(`
       <h3>API Health</h3>
       <p>Exchange Rate API: ${exchangeRateStatus} (Endpoint: ${exchangeRateEndpoint})</p>
@@ -633,5 +643,5 @@ async function fetchHealthStatus() {
 }
 
 // Khởi tạo và gọi hàm
-setInterval(fetchHealthStatus, 1000);
+setInterval(fetchHealthStatus, 500);
 fetchHealthStatus();
