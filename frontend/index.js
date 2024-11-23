@@ -1,7 +1,92 @@
 const exchangeRateStatusCounts = { up: 0, down: 0, partial: 0 };
 const goldStatusCounts = { up: 0, down: 0, partial: 0 };
 
+const trafficChartContext = document
+  .getElementById("trafficChart")
+  .getContext("2d");
 
+const trafficChart = new Chart(trafficChartContext, {
+  type: "line",
+  data: {
+    labels: [], // Thời gian
+    datasets: [
+      {
+        label: "Traffic",
+        data: [], // Số lượng yêu cầu
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+      },
+    ],
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Request Count",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Time",
+        },
+      },
+    },
+  },
+});
+
+const trafficChartContextGold = document
+  .getElementById("trafficChartGold")
+  .getContext("2d");
+
+const trafficChartGold = new Chart(trafficChartContextGold, {
+  type: "line",
+  data: {
+    labels: [], // Thời gian
+    datasets: [
+      {
+        label: "Traffic",
+        data: [], // Số lượng yêu cầu
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+      },
+    ],
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Request Count",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Time",
+        },
+      },
+    },
+  },
+});
+
+// Hàm để cập nhật dữ liệu biểu đồ
+function updateTrafficChart(time, req) {
+  trafficChart.data.labels.push(time);
+  trafficChart.data.datasets[0].data.push(req);
+  trafficChart.update();
+}
+
+function updateTrafficChartGold(time, req) {
+  trafficChartGold.data.labels.push(time);
+  trafficChartGold.data.datasets[0].data.push(req);
+  trafficChartGold.update();
+}
 
 // Tạo biểu đồ cho Exchange Rate API
 const exchangeRatePieCtx = document
@@ -513,7 +598,7 @@ async function updatePopupChart2(data) {
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
-const CLIENT_EMAIL = "nguyenvannamdeptrai2004@gmail.com";
+const CLIENT_EMAIL = "22028298@vnu.edu.vn";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
@@ -592,22 +677,14 @@ async function fetchHealthStatus() {
     exchangeRatePieChart.update();
     goldPieChart.update();
 
-    // Exchange-rate-api graph update
-
-    // console.log(
-    //   exchangeRateContainer,
-    //   exchangeRateEndpoint,
-    //   exchangeRateStatus
-    // );
-
+    updateTrafficChart(
+      currentTime,
+      healthData.exchangeRateApi.data.reqpersec * 5
+    );
+    updateTrafficChartGold(currentTime, healthData.goldApi.data.reqpersec * 5);
+    console.log(healthData.exchangeRateApi.data.reqpersec);
     updateChartData(2, currentTime, responseTime, goldContainer);
-    // console.log(goldContainer, goldEndpoint, goldStatus);
 
-    // console.log(responseTimeColorsContainer1);
-    // console.log(responseTimeColorsContainer2);
-    // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
-    // reqCount1.innerHTML = `Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}`;
-    // reqCount2.innerHTML = `Request Count: ${healthData?.goldApi?.data?.requestCount}`;
     $("#reqCount1").html(
       `<h3> Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}  </h3>`
     );
@@ -643,5 +720,5 @@ async function fetchHealthStatus() {
 }
 
 // Khởi tạo và gọi hàm
-setInterval(fetchHealthStatus, 500);
+setInterval(fetchHealthStatus, 5000);
 fetchHealthStatus();

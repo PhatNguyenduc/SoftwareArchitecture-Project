@@ -62,6 +62,7 @@ div:has(#exchangeRateChartContainer) {
 .status-section,
 .resources-section,
 .health-status-section {
+  background-color: #ffffff;
   padding: 20px;
   margin-bottom: 20px;
 }
