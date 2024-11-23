@@ -633,5 +633,5 @@ async function fetchHealthStatus() {
 }
 
 // Khởi tạo và gọi hàm
-setInterval(fetchHealthStatus, 1000);
+setInterval(fetchHealthStatus, 5000);
 fetchHealthStatus();

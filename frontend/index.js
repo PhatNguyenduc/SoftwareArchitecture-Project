@@ -513,7 +513,7 @@ async function updatePopupChart2(data) {
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
-const CLIENT_EMAIL = "nguyenvannamdeptrai2004@gmail.com";
+const CLIENT_EMAIL = "22028295@vnu.edu.vn";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 
@@ -643,5 +643,5 @@ async function fetchHealthStatus() {
 }
 
 // Khởi tạo và gọi hàm
-setInterval(fetchHealthStatus, 500);
+setInterval(fetchHealthStatus, 5000);
 fetchHealthStatus();
