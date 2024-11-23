@@ -598,7 +598,8 @@ async function updatePopupChart2(data) {
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
-const CLIENT_EMAIL = "22028298@vnu.edu.vn";
+<<<<<<< HEAD
+const CLIENT_EMAIL = "2202829@vnu.edu.vn";
 async function fetchHealthStatus() {
   const startTime = Date.now();
 

@@ -70,7 +70,7 @@ app.get("/exchange-rate-api/health", authenticateAPIKey, async (req, res) => {
   let validEmail = validateEmail(clientEmail);
 
   try {
-    const exchangeRateApiHealthResponse = getHealthInformation(
+    const exchangeRateApiHealthResponse = await getHealthInformation(
       exchangeRateApiHealthUrl,
       "exchange-rate-api"
     );
@@ -104,7 +104,7 @@ app.get("/gold-api/health", authenticateAPIKey, async (req, res) => {
   const clientEmail = req.headers["dest-email"];
   let validEmail = validateEmail(clientEmail);
   try {
-    const goldApiHealthResponse = getHealthInformation(
+    const goldApiHealthResponse = await getHealthInformation(
       goldApiHealthUrl,
       "gold-api"
     );
@@ -211,4 +211,6 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}/api/health`);
+  console.log(`Server monitoring gold-api is running on http://localhost:${port}/gold-api/health`);
+  console.log(`Server monitoring exchange-rate-api is running on http://localhost:${port}/exchange-rate-api/health`);
 });
