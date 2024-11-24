@@ -168,7 +168,7 @@ const goldPieChart = new Chart(goldPieCtx, {
     plugins: {
       title: {
         display: true,
-        text: "Gold API Status",
+        text: "Gold Price API Status",
         position: "bottom",
         padding: 20,
         font: {
@@ -598,6 +598,9 @@ async function updatePopupChart2(data) {
   }
 }
 
+let prevReqCountExchangeRate = 0;
+let prevRequestCountGold = 0;
+
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
 
@@ -614,7 +617,9 @@ async function fetchHealthStatus() {
         xhr.setRequestHeader("dest-email", CLIENT_EMAIL);
       },
     });
+
     const responseTime = Date.now() - startTime;
+    console.log(responseTime);
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
@@ -682,17 +687,25 @@ async function fetchHealthStatus() {
 
     updateTrafficChart(
       currentTime,
-      healthData.exchangeRateApi.data.reqpersec * 5
+      healthData.exchangeRateApi.data.requestCount - prevReqCountExchangeRate
     );
-    updateTrafficChartGold(currentTime, healthData.goldApi.data.reqpersec * 5);
-    console.log(healthData.exchangeRateApi.data.reqpersec);
+    updateTrafficChartGold(
+      currentTime,
+      healthData.goldApi.data.requestCount - prevRequestCountGold
+    );
+
+    prevReqCountExchangeRate = healthData.exchangeRateApi.data.requestCount;
+    prevRequestCountGold = healthData.goldApi.data.requestCount;
+    console.log(healthData.exchangeRateApi.data.requestCount);
+    console.log(prevReqCountExchangeRate);
+    // console.log(healthData.exchangeRateApi.data.reqpersec);
     updateChartData(2, currentTime, responseTime, goldStatus);
 
     $("#reqCount1").html(
-      `<h3> Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}  </h3>`
+      `<h4> Request Count: <span>${healthData?.exchangeRateApi?.data?.requestCount}</span>  </h4>`
     );
     $("#reqCount2").html(
-      `<h3> Request Count: ${healthData?.goldApi?.data?.requestCount}  </h3>`
+      `<h4> Request Count: <span>${healthData?.goldApi?.data?.requestCount}</span>  </h4>`
     );
     $("#health-status").html(`
       <h3>API Health</h3>
