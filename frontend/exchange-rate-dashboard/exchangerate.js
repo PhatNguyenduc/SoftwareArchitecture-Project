@@ -447,18 +447,10 @@ const networkChart2 = new Chart(
 
 async function updatePopupChart(data) {
   try {
-    const cpuUsagePercent = parseFloat(
-      data.data.cpuUsagePercent
-    );
-    const memoryUsageInMB = parseFloat(
-      data.data.memoryUsageInMB
-    );
-    const networkReceivedMB = parseFloat(
-      data.data.networkReceivedMB
-    );
-    const networkTransmittedMB = parseFloat(
-      data.data.networkTransmittedMB
-    );
+    const cpuUsagePercent = parseFloat(data?.data?.cpuUsagePercent);
+    const memoryUsageInMB = parseFloat(data?.data?.memoryUsageInMB);
+    const networkReceivedMB = parseFloat(data?.data?.networkReceivedMB);
+    const networkTransmittedMB = parseFloat(data?.data?.networkTransmittedMB);
 
     document.getElementById("cpuUsage").textContent = cpuUsagePercent + "%";
     document.getElementById("memoryUsage").textContent = memoryUsageInMB + "MB";
@@ -499,12 +491,9 @@ async function fetchHealthStatus() {
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
-    const exchangeRateStatus =
-      healthData?.data?.status ?? "DOWN";
-    const exchangeRateEndpoint =
-      healthData?.data?.endpointStatus ?? "DOWN";
-    const exchangeRateContainer =
-      healthData?.data?.containerStatus ?? "DOWN";
+    const exchangeRateStatus = healthData?.data?.status ?? "DOWN";
+    const exchangeRateEndpoint = healthData?.data?.endpointStatus ?? "DOWN";
+    const exchangeRateContainer = healthData?.data?.containerStatus ?? "DOWN";
 
     updateChartData(1, currentTime, responseTime, exchangeRateStatus);
     // Kiểm tra chi tiết trạng thái Exchange Rate

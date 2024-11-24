@@ -371,12 +371,10 @@ async function updatePopupChart(data) {
 }
 async function updatePopupChart2(data) {
   try {
-    const cpuUsagePercent = parseFloat(data.data.cpuUsagePercent);
-    const memoryUsageInMB = parseFloat(data.data.memoryUsageInMB);
-    const networkReceivedMB = parseFloat(data.data.networkReceivedMB);
-    const networkTransmittedMB = parseFloat(
-      data.data.networkTransmittedMB
-    );
+    const cpuUsagePercent = parseFloat(data?.data?.cpuUsagePercent);
+    const memoryUsageInMB = parseFloat(data?.data?.memoryUsageInMB);
+    const networkReceivedMB = parseFloat(data?.data?.networkReceivedMB);
+    const networkTransmittedMB = parseFloat(data?.data?.networkTransmittedMB);
 
     document.getElementById("cpuUsage2").textContent = cpuUsagePercent + "%";
     document.getElementById("memoryUsage2").textContent =

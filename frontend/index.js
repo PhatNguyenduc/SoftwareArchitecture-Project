@@ -570,11 +570,13 @@ async function updatePopupChart(data) {
 }
 async function updatePopupChart2(data) {
   try {
-    const cpuUsagePercent = parseFloat(data.goldApi.data.cpuUsagePercent);
-    const memoryUsageInMB = parseFloat(data.goldApi.data.memoryUsageInMB);
-    const networkReceivedMB = parseFloat(data.goldApi.data.networkReceivedMB);
+    const cpuUsagePercent = parseFloat(data?.goldApi?.data?.cpuUsagePercent);
+    const memoryUsageInMB = parseFloat(data?.goldApi?.data?.memoryUsageInMB);
+    const networkReceivedMB = parseFloat(
+      data?.goldApi?.data?.networkReceivedMB
+    );
     const networkTransmittedMB = parseFloat(
-      data.goldApi.data.networkTransmittedMB
+      data?.goldApi?.data?.networkTransmittedMB
     );
 
     document.getElementById("cpuUsage2").textContent = cpuUsagePercent + "%";
@@ -686,17 +688,16 @@ async function fetchHealthStatus() {
 
     updateTrafficChart(
       currentTime,
-      healthData.exchangeRateApi.data.requestCount - prevReqCountExchangeRate
+      healthData?.exchangeRateApi?.data?.requestCount - prevReqCountExchangeRate
     );
     updateTrafficChartGold(
       currentTime,
-      healthData.goldApi.data.requestCount - prevRequestCountGold
+      healthData?.goldApi?.data?.requestCount - prevRequestCountGold
     );
 
-    prevReqCountExchangeRate = healthData.exchangeRateApi.data.requestCount;
-    prevRequestCountGold = healthData.goldApi.data.requestCount;
-    console.log(healthData.exchangeRateApi.data.requestCount);
-    console.log(prevReqCountExchangeRate);
+    prevReqCountExchangeRate = healthData?.exchangeRateApi?.data?.requestCount;
+    prevRequestCountGold = healthData?.goldApi?.data?.requestCount;
+
     // console.log(healthData.exchangeRateApi.data.reqpersec);
     updateChartData(2, currentTime, responseTime, goldStatus);
 
