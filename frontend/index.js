@@ -596,6 +596,9 @@ async function updatePopupChart2(data) {
   }
 }
 
+let prevReqCountExchangeRate = 0;
+let prevRequestCountGold = 0;
+
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
 
@@ -612,7 +615,9 @@ async function fetchHealthStatus() {
         xhr.setRequestHeader("dest-email", CLIENT_EMAIL);
       },
     });
+
     const responseTime = Date.now() - startTime;
+    console.log(responseTime);
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
@@ -623,7 +628,7 @@ async function fetchHealthStatus() {
     const exchangeRateContainer =
       healthData?.exchangeRateApi?.data?.containerStatus ?? "DOWN";
 
-    updateChartData(1, currentTime, responseTime, exchangeRateContainer);
+    updateChartData(1, currentTime, responseTime, exchangeRateStatus);
     // Kiểm tra chi tiết trạng thái Exchange Rate
     if (
       exchangeRateStatus === "UP" &&
@@ -680,11 +685,19 @@ async function fetchHealthStatus() {
 
     updateTrafficChart(
       currentTime,
-      healthData.exchangeRateApi.data.reqpersec * 5
+      healthData.exchangeRateApi.data.requestCount - prevReqCountExchangeRate
     );
-    updateTrafficChartGold(currentTime, healthData.goldApi.data.reqpersec * 5);
-    console.log(healthData.exchangeRateApi.data.reqpersec);
-    updateChartData(2, currentTime, responseTime, goldContainer);
+    updateTrafficChartGold(
+      currentTime,
+      healthData.goldApi.data.requestCount - prevRequestCountGold
+    );
+
+    prevReqCountExchangeRate = healthData.exchangeRateApi.data.requestCount;
+    prevRequestCountGold = healthData.goldApi.data.requestCount;
+    console.log(healthData.exchangeRateApi.data.requestCount);
+    console.log(prevReqCountExchangeRate);
+    // console.log(healthData.exchangeRateApi.data.reqpersec);
+    updateChartData(2, currentTime, responseTime, goldStatus);
 
     $("#reqCount1").html(
       `<h3> Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}  </h3>`

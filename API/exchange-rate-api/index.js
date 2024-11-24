@@ -40,6 +40,7 @@ async function fetchExchangeRate() {
   const response = await axios.get(
     "https://www.vietcombank.com.vn/api/exchangerates?date=now"
   );
+  console.log(response);
   return response.data;
 }
 
