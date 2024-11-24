@@ -11,25 +11,13 @@ const app = express();
 const port = 3002;
 
 let requestCount = 0;
-let reqpersec = 0;
-let prevRequestCount = 0;
-let curRequestCount = 0;
-let prevRequestTime = Date.now();
-let curRequestTime = Date.now();
+
+
 app.use(cors());
 
 app.use((req, res, next) => {
   if (req.method === "GET") {
-    prevRequestCount = requestCount;
     requestCount++;
-    curRequestCount = requestCount;
-
-    prevRequestTime = curRequestTime;
-    curRequestTime = Date.now();
-
-    const timeDiff = (curRequestTime - prevRequestTime) / 1000; // Thời gian giữa các yêu cầu (giây)
-    reqpersec =
-      timeDiff > 0 ? (curRequestCount - prevRequestCount) / timeDiff : 0;
   }
 
   next();
@@ -39,8 +27,9 @@ app.use((req, res, next) => {
 async function fetchExchangeRate() {
   const response = await axios.get(
     "https://www.vietcombank.com.vn/api/exchangerates?date=now"
+    // "http://gold-api:3001/api/gold-price/health"
   );
-  console.log(response);
+  // console.log(response.data)
   return response.data;
 }
 
@@ -179,7 +168,6 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
       requestCount: requestCount,
-      reqpersec: reqpersec,
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -195,7 +183,6 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
       requestCount: requestCount,
-      reqpersec: reqpersec,
     });
   }
 });

@@ -75,6 +75,7 @@ const trafficChartGold = new Chart(trafficChartContextGold, {
   },
 });
 
+// let prevReqCountExchangeRateApi = 0
 // Hàm để cập nhật dữ liệu biểu đồ
 function updateTrafficChart(time, req) {
   trafficChart.data.labels.push(time);
@@ -82,6 +83,7 @@ function updateTrafficChart(time, req) {
   trafficChart.update();
 }
 
+// let prevReqCountGoldApi = 0
 function updateTrafficChartGold(time, req) {
   trafficChartGold.data.labels.push(time);
   trafficChartGold.data.datasets[0].data.push(req);
@@ -212,10 +214,10 @@ const responseTimeBgColorsContainer2 = [];
 function getColorForStatus(status, isBackground = false) {
   if (status === "DOWN") {
     return isBackground ? "rgba(255, 0, 0, 0.2)" : "rgba(255, 0, 0, 1)";
-  } else if (status === "PARTIALLY_UP") {
-    return isBackground ? "rgba(255, 255, 0, 0.2)" : "rgba(255, 255, 0, 1)";
-  } else {
+  } else if (status === "UP") {
     return isBackground ? "rgba(0, 255, 0, 0.2)" : "rgba(0, 255, 0, 1)";
+  } else {
+    return isBackground ? "rgba(255, 255, 0, 0.2)" : "rgba(255, 255, 0, 1)";
   }
 }
 // Tạo biểu đồ cho Container 1 (Exchange Rate API)
@@ -617,7 +619,6 @@ async function fetchHealthStatus() {
     });
 
     const responseTime = Date.now() - startTime;
-    console.log(responseTime);
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API

@@ -448,16 +448,16 @@ const networkChart2 = new Chart(
 async function updatePopupChart(data) {
   try {
     const cpuUsagePercent = parseFloat(
-      data.exchangeRateApi.data.cpuUsagePercent
+      data.data.cpuUsagePercent
     );
     const memoryUsageInMB = parseFloat(
-      data.exchangeRateApi.data.memoryUsageInMB
+      data.data.memoryUsageInMB
     );
     const networkReceivedMB = parseFloat(
-      data.exchangeRateApi.data.networkReceivedMB
+      data.data.networkReceivedMB
     );
     const networkTransmittedMB = parseFloat(
-      data.exchangeRateApi.data.networkTransmittedMB
+      data.data.networkTransmittedMB
     );
 
     document.getElementById("cpuUsage").textContent = cpuUsagePercent + "%";
@@ -479,35 +479,6 @@ async function updatePopupChart(data) {
     console.error("Error fetching system metrics:", error);
   }
 }
-async function updatePopupChart2(data) {
-  try {
-    const cpuUsagePercent = parseFloat(data.goldApi.data.cpuUsagePercent);
-    const memoryUsageInMB = parseFloat(data.goldApi.data.memoryUsageInMB);
-    const networkReceivedMB = parseFloat(data.goldApi.data.networkReceivedMB);
-    const networkTransmittedMB = parseFloat(
-      data.goldApi.data.networkTransmittedMB
-    );
-
-    document.getElementById("cpuUsage2").textContent = cpuUsagePercent + "%";
-    document.getElementById("memoryUsage2").textContent =
-      memoryUsageInMB + "MB";
-    document.getElementById("networkIo2").textContent =
-      networkReceivedMB + "MB / " + networkTransmittedMB + "MB";
-
-    const now = new Date().toLocaleTimeString();
-    labels2.push(now);
-    cpuUsageData2.push(cpuUsagePercent);
-    memoryUsageData2.push(memoryUsageInMB);
-    networkReceivedData2.push(networkReceivedMB);
-    networkTransmittedData2.push(networkTransmittedMB);
-
-    cpuChart2.update();
-    memoryChart2.update();
-    networkChart2.update();
-  } catch (error) {
-    console.error("Error fetching system metrics:", error);
-  }
-}
 
 // Hàm lấy trạng thái sức khỏe từ server và tính thời gian phản hồi
 const API_KEY = "anhHiepDepTrai";
@@ -517,7 +488,7 @@ async function fetchHealthStatus() {
 
   try {
     const healthData = await $.ajax({
-      url: "http://localhost:8020/api/health",
+      url: "http://localhost:8020/exchange-rate-api/health",
       method: "GET",
       beforeSend: function (xhr) {
         xhr.setRequestHeader("api-key", API_KEY);
@@ -529,13 +500,13 @@ async function fetchHealthStatus() {
 
     // Kiểm tra trạng thái Exchange Rate API
     const exchangeRateStatus =
-      healthData?.exchangeRateApi?.data?.status ?? "DOWN";
+      healthData?.data?.status ?? "DOWN";
     const exchangeRateEndpoint =
-      healthData?.exchangeRateApi?.data?.endpointStatus ?? "DOWN";
+      healthData?.data?.endpointStatus ?? "DOWN";
     const exchangeRateContainer =
-      healthData?.exchangeRateApi?.data?.containerStatus ?? "DOWN";
+      healthData?.data?.containerStatus ?? "DOWN";
 
-    updateChartData(1, currentTime, responseTime, exchangeRateContainer);
+    updateChartData(1, currentTime, responseTime, exchangeRateStatus);
     // Kiểm tra chi tiết trạng thái Exchange Rate
     if (
       exchangeRateStatus === "UP" &&
@@ -551,27 +522,6 @@ async function fetchHealthStatus() {
       exchangeRateContainer !== "UP"
     ) {
       exchangeRateStatusCounts.down++;
-    }
-
-    // Kiểm tra trạng thái Gold API
-    const goldStatus = healthData?.goldApi?.data?.status ?? "DOWN";
-    const goldEndpoint = healthData?.goldApi?.data?.endpointStatus ?? "DOWN";
-
-    const goldContainer = healthData?.goldApi?.data?.containerStatus ?? "DOWN";
-
-    // console.log(goldStatus, goldEndpoint, goldContainer);
-
-    // Kiểm tra chi tiết trạng thái Gold
-    if (
-      goldStatus === "UP" &&
-      goldEndpoint === "UP" &&
-      goldContainer === "UP"
-    ) {
-      goldStatusCounts.up++;
-    } else if (goldStatus === "PARTIALLY_UP") {
-      goldStatusCounts.partial++;
-    } else if (goldStatus === "DOWN" || goldContainer !== "UP") {
-      goldStatusCounts.down++;
     }
 
     // Cập nhật biểu đồ tròn
@@ -598,7 +548,6 @@ async function fetchHealthStatus() {
     //   exchangeRateStatus
     // );
 
-    updateChartData(2, currentTime, responseTime, goldContainer);
     // console.log(goldContainer, goldEndpoint, goldStatus);
 
     // console.log(responseTimeColorsContainer1);
@@ -612,7 +561,7 @@ async function fetchHealthStatus() {
 
     $("#resources").html(`
       <h3>Memory Usage</h3>
-      <p>Exchange Rate API: ${healthData?.exchangeRateApi?.data?.memoryUsageInMB} MB / ${healthData?.exchangeRateApi?.data?.totalMemoryInMB}</p>
+      <p>Exchange Rate API: ${healthData?.data?.memoryUsageInMB} MB / ${healthData?.data?.totalMemoryInMB}</p>
       
     `);
 
@@ -624,7 +573,6 @@ async function fetchHealthStatus() {
 
     // popup
     updatePopupChart(healthData);
-    updatePopupChart2(healthData);
     // end popup
   } catch (error) {
     console.error("Error fetching health status:", error);
