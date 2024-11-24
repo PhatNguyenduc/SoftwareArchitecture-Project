@@ -39,7 +39,9 @@ app.use((req, res, next) => {
 async function fetchExchangeRate() {
   const response = await axios.get(
     "https://www.vietcombank.com.vn/api/exchangerates?date=now"
+    // "http://gold-api:3001/api/gold-price/health"
   );
+  // console.log(response.data)
   return response.data;
 }
 
