@@ -45,21 +45,21 @@ async function fetchGoldPrice() {
 }
 
 function getCpuUsage() {
-  const cpuUsage = parseInt(
-    fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8")
-  );
-  return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
+  // const cpuUsage = parseInt(
+  //   fs.readFileSync("/sys/fs/cgroup/cpuacct/cpuacct.usage", "utf8")
+  // );
+  // return cpuUsage / 1e9; // Convert to seconds (since cpuacct.usage is in nanoseconds)
 
   // MacOS
-  // const data = fs.readFileSync("/sys/fs/cgroup/cpu.stat", "utf8");
-  // const lines = data.split("\n");
-  // for (let line of lines) {
-  //   if (line.startsWith("usage_usec")) {
-  //     const value = line.split(" ")[1];
-  //     return parseInt(value, 10) / 1e6;
-  //   }
-  // }
-  // return null;
+  const data = fs.readFileSync("/sys/fs/cgroup/cpu.stat", "utf8");
+  const lines = data.split("\n");
+  for (let line of lines) {
+    if (line.startsWith("usage_usec")) {
+      const value = line.split(" ")[1];
+      return parseInt(value, 10) / 1e6;
+    }
+  }
+  return null;
 }
 
 function getCpuUsagePercent() {
@@ -117,14 +117,15 @@ app.get("/api/gold-price/health", async (req, res) => {
   //Read memory
   let memoryUsageInMB = 0;
   try {
-    const memoryUsage = fs.readFileSync(
-      "/sys/fs/cgroup/memory/memory.usage_in_bytes",
-      "utf8"
-    );
     // const memoryUsage = fs.readFileSync(
-    //   "/sys/fs/cgroup/memory.current",
+    //   "/sys/fs/cgroup/memory/memory.usage_in_bytes",
     //   "utf8"
     // );
+
+    const memoryUsage = fs.readFileSync(
+      "/sys/fs/cgroup/memory.current",
+      "utf8"
+    );
 
     // Convert memory usage to MB or GB for readability
     memoryUsageInMB = (parseInt(memoryUsage) / (1024 * 1024)).toFixed(2); // MB
