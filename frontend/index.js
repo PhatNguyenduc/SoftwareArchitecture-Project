@@ -605,7 +605,7 @@ async function fetchHealthStatus() {
 
   try {
     const healthData = await $.ajax({
-      url: "http://localhost:8020/api/health",
+      url: "https://software-architecture-monitor.onrender.com/api/health",
       method: "GET",
       beforeSend: function (xhr) {
         xhr.setRequestHeader("api-key", API_KEY);
