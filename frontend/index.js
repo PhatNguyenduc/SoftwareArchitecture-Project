@@ -619,7 +619,6 @@ async function fetchHealthStatus() {
     });
 
     const responseTime = Date.now() - startTime;
-    console.log(responseTime);
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
