@@ -12,12 +12,11 @@ const port = 8020;
 const exchangeRatePort = 3002;
 const goldPricePort = 3001;
 
-// const exchangeRateApiHealthUrl =
-//   "https://softwarearchitecture-project-exchange.onrender.com/api/exchange-rate/health";
-// const goldApiHealthUrl = `https://softwarearchitecture-project-gold.onrender.com/api/gold-price/health`;
+// const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/api/exchange-rate/health`;
+// const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
 
-const exchangeRateApiHealthUrl = `http://exchange-rate-api:${exchangeRatePort}/api/exchange-rate/health`;
-const goldApiHealthUrl = `http://gold-api:${goldPricePort}/api/gold-price/health`;
+const exchangeRateApiHealthUrl = process.env.EXCHANGE_RATE_API_HEALTH_URL;
+const goldApiHealthUrl = process.env.GOLD_PRICE_API_HEALTH_URL;
 
 const coolDownTime = 1000 * 60 * 10; // 10 min
 var exchangeRateNotificationTimePoint = 0;
@@ -211,6 +210,10 @@ app.get("/api/health", authenticateAPIKey, async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}/api/health`);
-  console.log(`Server monitoring gold-api is running on http://localhost:${port}/gold-api/health`);
-  console.log(`Server monitoring exchange-rate-api is running on http://localhost:${port}/exchange-rate-api/health`);
+  console.log(
+    `Server monitoring gold-api is running on http://localhost:${port}/gold-api/health`
+  );
+  console.log(
+    `Server monitoring exchange-rate-api is running on http://localhost:${port}/exchange-rate-api/health`
+  );
 });
