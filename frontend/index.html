@@ -30,21 +30,37 @@
     <h2 class="section-title">Health Status</h2>
     <div id="health-status" class="health-status-section"></div>
 
-    <h2 class="section-title">Response Time for Exchange Rate API</h2>
-    <div class="chart-container">
-      <canvas id="trafficChart1"></canvas>
-    </div>
-    <div
-      style="background-color: white; border-radius: 10px; box-shadow: black"
-    >
-      <h1>Traffic Chart for Exchange Rate Container</h1>
-      <canvas id="trafficChart" width="400" height="200"></canvas>
+    <h2 class="section-title">
+      Response Time and Traffic for Exchange Rate API
+    </h2>
+    <div class="flex-container">
+      <div>
+        <div class="chart-container">
+          <canvas id="trafficChart1"></canvas>
+        </div>
+      </div>
+      <div>
+        <!-- <h2 class="section-title">Traffic Chart for Exchange Rate Container</h2> -->
+        <div class="chart-container">
+          <canvas id="trafficChart" width="400" height="200"></canvas>
+        </div>
+      </div>
     </div>
 
-    <h2 class="section-title">Response Time for Gold Price API</h2>
-    <div class="chart-container">
-      <canvas id="trafficChart2"></canvas>
+    <h2 class="section-title">Response Time and Traffic for Gold Price API</h2>
+    <div class="flex-container">
+      <div>
+        <div class="chart-container">
+          <canvas id="trafficChart2"></canvas>
+        </div>
+      </div>
+      <div>
+        <div class="chart-container">
+          <canvas id="trafficChartGold" width="400" height="200"></canvas>
+        </div>
+      </div>
     </div>
+
     <div id="overlay" class="overlay"></div>
 
     <div class="popup" id="myPopup">
@@ -95,12 +111,6 @@
     </div>
     <hr />
 
-    <div
-      style="background-color: white; border-radius: 10px; box-shadow: black"
-    >
-      <h1>Traffic Chart for Gold Price Container</h1>
-      <canvas id="trafficChartGold" width="400" height="200"></canvas>
-    </div>
     <script src="index.js"></script>
   </body>
 </html>
