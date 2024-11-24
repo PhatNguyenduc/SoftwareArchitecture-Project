@@ -687,10 +687,10 @@ async function fetchHealthStatus() {
     updateChartData(2, currentTime, responseTime, goldContainer);
 
     $("#reqCount1").html(
-      `<h3> Request Count: ${healthData?.exchangeRateApi?.data?.requestCount}  </h3>`
+      `<h4> Request Count: <span>${healthData?.exchangeRateApi?.data?.requestCount}</span>  </h4>`
     );
     $("#reqCount2").html(
-      `<h3> Request Count: ${healthData?.goldApi?.data?.requestCount}  </h3>`
+      `<h4> Request Count: <span>${healthData?.goldApi?.data?.requestCount}</span>  </h4>`
     );
     $("#health-status").html(`
       <h3>API Health</h3>
