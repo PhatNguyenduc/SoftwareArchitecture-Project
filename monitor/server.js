@@ -50,8 +50,6 @@ async function getHealthInformation(url, apiName) {
     if (response.status === 200) {
       return { data: response.data };
     } else if (response.status === 500 && response.data !== null) {
-      // Partially operational: service is up but experiencing issues
-      // console.log("exchangeRateApiHealthResponse", response);
       return { data: response.data };
     } else {
       console.error(`Error fetching ${apiName} health:`, error.message);

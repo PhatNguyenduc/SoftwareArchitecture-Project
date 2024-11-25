@@ -527,21 +527,7 @@ async function fetchHealthStatus() {
 
     // Cập nhật biểu đồ
     exchangeRatePieChart.update();
-    // goldPieChart.update();
-
-    // Exchange-rate-api graph update
-
-    // console.log(
-    //   exchangeRateContainer,
-    //   exchangeRateEndpoint,
-    //   exchangeRateStatus
-    // );
-
-    // console.log(goldContainer, goldEndpoint, goldStatus);
-
-    // console.log(responseTimeColorsContainer1);
-    // console.log(responseTimeColorsContainer2);
-    // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
+    
     $("#health-status").html(`
       <h3>API Health</h3>
       <p>Exchange Rate API: ${exchangeRateStatus} (Endpoint: ${exchangeRateEndpoint})</p>
