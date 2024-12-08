@@ -401,8 +401,6 @@ async function updatePopupChart2(data) {
 const API_KEY = "anhHiepDepTrai";
 const CLIENT_EMAIL = "nguyenvannamdeptrai2004@gmail.com";
 async function fetchHealthStatus() {
-  const startTime = Date.now();
-
   try {
     const healthData = await $.ajax({
       url: "http://localhost:8020/gold-api/health",
@@ -412,7 +410,7 @@ async function fetchHealthStatus() {
         xhr.setRequestHeader("dest-email", CLIENT_EMAIL);
       },
     });
-    const responseTime = Date.now() - startTime;
+    const responseTime = healthData?.responseTime;
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Gold API
@@ -438,36 +436,14 @@ async function fetchHealthStatus() {
       goldStatusCounts.down++;
     }
 
-    // Cập nhật biểu đồ tròn
-    // exchangeRatePieChart.data.datasets[0].data = [
-    //   exchangeRateStatusCounts.up,
-    //   exchangeRateStatusCounts.down,
-    //   exchangeRateStatusCounts.partial,
-    // ];
     goldPieChart.data.datasets[0].data = [
       goldStatusCounts.up,
       goldStatusCounts.down,
       goldStatusCounts.partial,
     ];
 
-    // Cập nhật biểu đồ
-    // exchangeRatePieChart.update();
     goldPieChart.update();
 
-    // Exchange-rate-api graph update
-
-    // console.log(
-    //   exchangeRateContainer,
-    //   exchangeRateEndpoint,
-    //   exchangeRateStatus
-    // );
-
-    updateChartData(2, currentTime, responseTime, goldContainer);
-    // console.log(goldContainer, goldEndpoint, goldStatus);
-
-    // console.log(responseTimeColorsContainer1);
-    // console.log(responseTimeColorsContainer2);
-    // Cập nhật thông tin trạng thái với thông tin chi tiết hơn
     $("#health-status").html(`
       <h3>API Health</h3>
       <p>Gold Price API: ${goldStatus} (Endpoint: ${goldEndpoint})</p>

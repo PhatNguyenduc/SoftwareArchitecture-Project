@@ -11,8 +11,7 @@ const app = express();
 const port = 3002;
 
 let requestCount = 0;
-
-
+let trafficCount = 0;
 app.use(cors());
 
 app.use((req, res, next) => {
@@ -22,6 +21,11 @@ app.use((req, res, next) => {
 
   next();
 });
+async function getTrafficCount() {
+  trafficCount = requestCount;
+  requestCount = 0;
+}
+setInterval(getTrafficCount, 5000);
 
 // Định nghĩa một hàm cho API tỷ giá ngoại tệ
 async function fetchExchangeRate() {
@@ -167,7 +171,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
-      requestCount: requestCount,
+      requestCount: trafficCount,
     });
   } catch (error) {
     // If the circuit breaker is open or there is an error, return a status of DOWN
@@ -182,7 +186,7 @@ app.get("/api/exchange-rate/health", async (req, res) => {
       cpuUsagePercent: cpuUsagePercent,
       networkReceivedMB: networkReceivedMB,
       networkTransmittedMB: networkTransmittedMB,
-      requestCount: requestCount,
+      requestCount: trafficCount,
     });
   }
 });

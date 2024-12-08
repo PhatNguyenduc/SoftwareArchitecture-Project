@@ -537,16 +537,16 @@ const networkChart2 = new Chart(
 async function updatePopupChart(data) {
   try {
     const cpuUsagePercent = parseFloat(
-      data.exchangeRateApi.data.cpuUsagePercent
+      data?.exchangeRateApi?.data?.cpuUsagePercent
     );
     const memoryUsageInMB = parseFloat(
-      data.exchangeRateApi.data.memoryUsageInMB
+      data?.exchangeRateApi?.data?.memoryUsageInMB
     );
     const networkReceivedMB = parseFloat(
-      data.exchangeRateApi.data.networkReceivedMB
+      data?.exchangeRateApi?.data?.networkReceivedMB
     );
     const networkTransmittedMB = parseFloat(
-      data.exchangeRateApi.data.networkTransmittedMB
+      data?.exchangeRateApi?.data?.networkTransmittedMB
     );
 
     document.getElementById("cpuUsage").textContent = cpuUsagePercent + "%";
@@ -608,8 +608,6 @@ const API_KEY = "anhHiepDepTrai";
 
 const CLIENT_EMAIL = "2202829@vnu.edu.vn";
 async function fetchHealthStatus() {
-  const startTime = Date.now();
-
   try {
     const healthData = await $.ajax({
       url: "http://localhost:8020/api/health",
@@ -620,7 +618,8 @@ async function fetchHealthStatus() {
       },
     });
 
-    const responseTime = Date.now() - startTime;
+    const responseTimeGold = healthData?.goldApi?.responseTime;
+    const responseTimeExchangeRate = healthData?.exchangeRateApi?.responseTime;
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
@@ -631,7 +630,12 @@ async function fetchHealthStatus() {
     const exchangeRateContainer =
       healthData?.exchangeRateApi?.data?.containerStatus ?? "DOWN";
 
-    updateChartData(1, currentTime, responseTime, exchangeRateStatus);
+    updateChartData(
+      1,
+      currentTime,
+      responseTimeExchangeRate,
+      exchangeRateStatus
+    );
     // Kiểm tra chi tiết trạng thái Exchange Rate
     if (
       exchangeRateStatus === "UP" &&
@@ -688,18 +692,18 @@ async function fetchHealthStatus() {
 
     updateTrafficChart(
       currentTime,
-      healthData?.exchangeRateApi?.data?.requestCount - prevReqCountExchangeRate
+      healthData?.exchangeRateApi?.data?.requestCount
     );
     updateTrafficChartGold(
       currentTime,
-      healthData?.goldApi?.data?.requestCount - prevRequestCountGold
+      healthData?.goldApi?.data?.requestCount
     );
 
-    prevReqCountExchangeRate = healthData?.exchangeRateApi?.data?.requestCount;
-    prevRequestCountGold = healthData?.goldApi?.data?.requestCount;
+    // prevReqCountExchangeRate = healthData?.exchangeRateApi?.data?.requestCount;
+    // prevRequestCountGold = healthData?.goldApi?.data?.requestCount;
 
     // console.log(healthData.exchangeRateApi.data.reqpersec);
-    updateChartData(2, currentTime, responseTime, goldStatus);
+    updateChartData(2, currentTime, responseTimeGold, goldStatus);
 
     $("#reqCount1").html(
       `<h4> Request Count: <span>${healthData?.exchangeRateApi?.data?.requestCount}</span>  </h4>`

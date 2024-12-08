@@ -476,8 +476,6 @@ async function updatePopupChart(data) {
 const API_KEY = "anhHiepDepTrai";
 const CLIENT_EMAIL = "nguyenvannamdeptrai2004@gmail.com";
 async function fetchHealthStatus() {
-  const startTime = Date.now();
-
   try {
     const healthData = await $.ajax({
       url: "http://localhost:8020/exchange-rate-api/health",
@@ -487,7 +485,7 @@ async function fetchHealthStatus() {
         xhr.setRequestHeader("dest-email", CLIENT_EMAIL);
       },
     });
-    const responseTime = Date.now() - startTime;
+    const responseTime = healthData?.responseTime;
     const currentTime = new Date().toLocaleTimeString();
 
     // Kiểm tra trạng thái Exchange Rate API
